@@ -8,6 +8,7 @@ Client *init_client(SOCKET socket, char *name, messageList *messages, clientList
     strcpy(client->name, name);
     client->messages = messages;
     client->subbedTo = subbedTo;
+    client->isConnected = false;
     return client;
 }
 void delete_client(Client *client)
@@ -28,7 +29,6 @@ void client_unsubscribe(Client *client, Client *UnsubscribeTo)
 }
 
 /*********  messageList  **********/
-
 messageList *init_messageList(char *content, clientList *receivers)
 {
     messageList *message = malloc(sizeof(messageList));

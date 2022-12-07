@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define PSEUDO_SIZE 6
 typedef int SOCKET;
@@ -26,8 +27,8 @@ typedef struct Client
     SOCKET socket;
     char name[PSEUDO_SIZE];
 
+    bool isConnected;
     clientList *subbedTo;
-
     messageList *messages;
 } Client;
 
@@ -45,4 +46,5 @@ clientList *init_clienList(Client *client);
 void delete_clientList(clientList *clientList);
 void add_client(clientList *clientList, Client *client);
 void remove_client(clientList *clientList, Client *client);
+
 #endif
