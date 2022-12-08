@@ -45,10 +45,10 @@ int start_server(int port)
         }
         else
         {
-            handle_client(readfds, maxFD);
+            handle_request(readfds, maxFD);
         }
     }
-    end_server(server_socket);
+    kill_server(server_socket);
 }
 
 int init_server(int port)
@@ -114,6 +114,31 @@ void handle_request(fd_set readfds, int server_socket)
         printf("Unknown request\n");
         break;
     }
+}
+void kill_server(SOCKET server_socket)
+{
+    close(server_socket);
+}
+void handle_subscribe(char *buffer, int client_socket)
+{
+}
+void handle_unsubscribe(char *buffer, int client_socket)
+{
+}
+void handle_publish(char *buffer, int client_socket)
+{
+}
+void handle_list(char *buffer, int client_socket)
+{
+}
+void handle_quit(char *buffer, int client_socket)
+{
+}
+void handle_new_account(char *buffer, int client_socket)
+{
+}
+void handle_login(char *buffer, int client_socket)
+{
 }
 
 int main(int argc, char **argv)

@@ -1,4 +1,4 @@
-all: client server
+all: server
 
 GCC_OPT= -Wall
 
