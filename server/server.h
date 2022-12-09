@@ -13,6 +13,7 @@
 #define PORT 5000
 #define MAX_CLIENTS 10
 #define BUFFER_SIZE 1024
+#define PUBLICATION_SIZE 20
 typedef int SOCKET;
 
 enum requestType
@@ -52,7 +53,7 @@ void handle_login(char *buffer, int client_socket);
 
 /*
 DATA FORMAT :
-
+N-Users
 pseudo1
 SubbedTo pseudo list
 n-messages
@@ -66,12 +67,15 @@ pseudo2
 
 */
 
-void save_as(char *file_path, char *data);
-void load_from(char *file_path, clientList *clist);
+/***********    DATABASE   ***********/
+void save_as(FILE *f, char *data);
+clientList *loadDB_from(char *file_path);
+
+void DB_save(char *file_path, clientList *Users);
 
 /***********    TESTS   ***********/
-void testDB_save();
-void testDB_load();
+void testDB_save(char *fpath, clientList *Users);
+clientList *testDB_load(char *fpath);
 clientList *clientList_tostring_test(bool prints);
 messageList *messageList_tostring_test(bool prints);
 Client *client_tostring_test(bool prints);
