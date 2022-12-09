@@ -11,6 +11,18 @@ Client *init_client(SOCKET socket, char *name, messageList *messages, clientList
     client->isConnected = false;
     return client;
 }
+
+int clientList_length(clientList *clist)
+{
+    int length = 0;
+    clientList *temp = clist;
+    while (temp != NULL)
+    {
+        length++;
+        temp = temp->next;
+    }
+    return length;
+}
 void delete_client(Client *client)
 {
     delete_clientList(client->subbedTo);

@@ -50,6 +50,7 @@ clientList *init_clientList(Client *client);
 void delete_clientList(clientList *clist);
 void add_client(clientList *clist, Client *client);
 void remove_client(clientList *clientList, Client *client);
+int clientList_length(clientList *clist);
 
 char *client_to_string(Client *client);
 char *clients_to_string(clientList *clients);
