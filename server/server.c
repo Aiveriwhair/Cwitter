@@ -215,6 +215,19 @@ Client *client_tostring_test(bool prints)
     }
     return cli;
 }
+Client *clients_tostring_test(bool prints)
+{
+    clientList *clist = init_clientList(NULL);
+    add_client(clist, client_tostring_test(false));
+    add_client(clist, client_tostring_test(false));
+    add_client(clist, client_tostring_test(false));
+    if (prints)
+    {
+        char *str = clients_to_string(clist);
+        printf("clients_tostring_test:\n%s", str);
+        free(str);
+    }
+}
 
 int main(int argc, char **argv)
 {
@@ -225,6 +238,6 @@ int main(int argc, char **argv)
     // }
     // start_server(atoi(argv[1]));
 
-    client_tostring_test(true);
+    clients_tostring_test(true);
     return EXIT_SUCCESS;
 }
