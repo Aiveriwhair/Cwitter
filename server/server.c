@@ -151,23 +151,31 @@ void save_as(char *file_path, char *data)
     fprintf(file, "%s", data);
 
     fclose(file);
+    free(data);
 }
 
 void testDB_save()
 {
+    clientList *receivers = clientList_tostring_test(false);
+    messageList *mlist = messageList_tostring_test(false);
     clientList *allUsers = init_clientList(NULL);
-    add_client(allUsers, init_client(0, "Willia", NULL, NULL));
-    add_client(allUsers, init_client(0, "Lea", NULL, NULL));
+    add_client(allUsers, init_client(0, "Willia", mlist, receivers));
+    add_client(allUsers, init_client(0, "Lea", NULL, receivers));
     add_client(allUsers, init_client(0, "Margot", NULL, NULL));
-    add_client(allUsers, init_client(0, "Jerem", NULL, NULL));
-    add_client(allUsers, init_client(0, "Lucas", NULL, NULL));
-    add_client(allUsers, init_client(0, "Benja", NULL, NULL));
+    add_client(allUsers, init_client(0, "Jerem", NULL, receivers));
+    add_client(allUsers, init_client(0, "Lucas", mlist, NULL));
+    add_client(allUsers, init_client(0, "Benja", mlist, NULL));
     add_client(allUsers, init_client(0, "Lony", NULL, NULL));
-    add_client(allUsers, init_client(0, "Luiza", NULL, NULL));
+    add_client(allUsers, init_client(0, "Luiza", NULL, receivers));
 
-    char *data = clients_to_string(clients);
+    char *data = clients_to_string(allUsers);
     char *file_path = "db.txt";
+
     save_as(file_path, data);
+}
+
+void testDB_load()
+{
 }
 
 clientList *clientList_tostring_test(bool prints)
@@ -215,7 +223,7 @@ Client *client_tostring_test(bool prints)
     }
     return cli;
 }
-Client *clients_tostring_test(bool prints)
+clientList *clients_tostring_test(bool prints)
 {
     clientList *clist = init_clientList(NULL);
     add_client(clist, client_tostring_test(false));
@@ -228,6 +236,23 @@ Client *clients_tostring_test(bool prints)
         free(str);
     }
 }
+void test_dataBase()
+{
+    clientList *receiv = init_clientList(init_client(0, "Jerem", NULL, NULL));
+    add_client(receiv, init_client(0, "Lucas", NULL, NULL));
+    // messageList *messListclient1 = init_messageList("message1", receiv);
+    messageList *messListclient2 = init_messageList("message2", init_clientList(init_client(0, "William", NULL, NULL)));
+    // add_message(messListclient1, "message2", init_clientList(init_client(0, "Lucas", NULL, NULL)));
+    // Client *c1 = init_client(0, "client1", messListclient1, init_clientList(init_client(0, "abos1", NULL, NULL)));
+    Client *c2 = init_client(0, "client2", messListclient2, init_clientList(init_client(0, "abos2", NULL, NULL)));
+
+    clientList *cList = init_clientList(init_client(0, "Jerem", NULL, NULL));
+    add_client(cList, init_client(0, "Will", NULL, NULL));
+    add_client(cList, c2);
+
+    char *data = clients_to_string(cList);
+    save_as("data.txt", data);
+}
 
 int main(int argc, char **argv)
 {
@@ -237,7 +262,6 @@ int main(int argc, char **argv)
     //     return EXIT_FAILURE;
     // }
     // start_server(atoi(argv[1]));
-
-    clients_tostring_test(true);
+    testDB_save();
     return EXIT_SUCCESS;
 }

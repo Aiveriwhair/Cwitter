@@ -51,6 +51,11 @@ void delete_messageList(messageList *messages)
 
 void add_message(messageList *mlist, char *message, clientList *receivers)
 {
+    if (mlist == NULL)
+    {
+        mlist = init_messageList(message, receivers);
+        return;
+    }
     if (mlist->content == NULL)
     {
         mlist->content = message;
@@ -121,6 +126,11 @@ void delete_clientList(clientList *cList)
 
 void add_client(clientList *cList, Client *client)
 {
+    if (cList == NULL)
+    {
+        cList = init_clientList(client);
+        return;
+    }
     if (cList->client == NULL)
     {
         cList->client = client;
@@ -159,19 +169,40 @@ void remove_client(clientList *cList, Client *client)
 
 char *client_to_string(Client *client)
 {
+    char *res = malloc(0);
     // pseudo
-    char *res = malloc(charS * strlen(client->name) + charS);
-    res = strcat(strcat(res, client->name), "\n");
+    if (client->name != NULL)
+    {
+        res = realloc(res, charS * strlen(client->name) + charS);
+        res = strcat(strcat(res, client->name), "\n");
+    }
+    else
+    {
+        res = realloc(res, charS * strlen(client->name) + charS);
+        res = strcat(res, "unamed\n");
+    }
 
     // receivers \n
-    char *subbedtoStr = clientList_to_string(client->subbedTo);
-    res = realloc(res, charS * strlen(res) + charS * strlen(subbedtoStr) + charS);
-    res = strcat(res, subbedtoStr);
+    if (client->subbedTo != NULL)
+    {
+        char *subbedtoStr = clientList_to_string(client->subbedTo);
+        res = realloc(res, charS * strlen(res) + charS * strlen(subbedtoStr) + charS);
+        res = strcat(res, subbedtoStr);
+    }
 
     // messages
-    char *messagesStr = messageList_to_string(client->messages);
-    res = realloc(res, charS * strlen(res) + charS * strlen(messagesStr) + charS);
-    res = strcat(res, messagesStr);
+    if (client->messages != NULL)
+    {
+        char *messagesStr = messageList_to_string(client->messages);
+        res = realloc(res, charS * strlen(res) + charS * strlen(messagesStr) + charS);
+        res = strcat(res, messagesStr);
+    }
+    else
+    {
+        char *messagesStr = "0\n";
+        res = realloc(res, charS * strlen(res) + charS * strlen(messagesStr) + charS);
+        res = strcat(res, messagesStr);
+    }
     return res;
 }
 char *clients_to_string(clientList *clist)
@@ -181,6 +212,8 @@ char *clients_to_string(clientList *clist)
     while (temp != NULL)
     {
         Client *current = temp->client;
+        if (current == NULL)
+            break;
         char *currentStr = client_to_string(current);
         res = realloc(res, charS * strlen(res) + charS * strlen(currentStr) + charS);
         res = strcat(res, currentStr);

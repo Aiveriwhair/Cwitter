@@ -75,6 +75,6 @@ void testDB_load();
 clientList *clientList_tostring_test(bool prints);
 messageList *messageList_tostring_test(bool prints);
 Client *client_tostring_test(bool prints);
-Client *clients_tostring_test(bool prints);
+clientList *clients_tostring_test(bool prints);
 
 #endif
