@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Cwitter
 
 - SERVERSIDE - Struct Client
@@ -7,3 +8,5 @@
 - SERVERSIDE - DATA LOADING
 - SERVERSIDE - Request handlers
 - CLIENTSIDE - Request handlers
+
+A Twitter clone app, using C, in your Terminal
