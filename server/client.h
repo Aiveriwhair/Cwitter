@@ -41,10 +41,15 @@ messageList *init_messageList(char *content, clientList *receivers);
 void delete_messageList(messageList *messages);
 void add_message(messageList *messages, char *message, clientList *receivers);
 void remove_message(messageList *messages, char *message);
+int messageList_length(messageList *messages);
 
 clientList *init_clienList(Client *client);
-void delete_clientList(clientList *clientList);
-void add_client(clientList *clientList, Client *client);
+void delete_clientList(clientList *clist);
+void add_client(clientList *clist, Client *client);
 void remove_client(clientList *clientList, Client *client);
 
+char *client_to_string(Client *client);
+char *clients_to_string(clientList *clients);
+char *clientList_to_string(clientList *clist);
+char *messageList_to_string(messageList *messages);
 #endif

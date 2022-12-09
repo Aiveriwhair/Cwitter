@@ -141,14 +141,40 @@ void handle_login(char *buffer, int client_socket)
 {
 }
 
+void save_as(char *file_path, char *data)
+{
+    FILE *file = fopen(file_path, "w+");
+    if (file == NULL)
+    {
+        printf("Error opening file");
+    }
+    fprintf(file, "%s", data);
+
+    fclose(file);
+}
+
+// void testDB()
+// {
+//     clientList *clients = init_clientList();
+//     Client *c1 = init_client(1, "William", );
+//     Client *c2 = init_client(2, "Jerem");
+//     Client *c3 = init_client(3, "Lucas");
+//     Client *c4 = init_client(4, "Benjamin");
+
+//     char *data = clients_to_string(clients);
+
+//     char *file_path = "db.txt";
+//     save_as(file_path, data);
+// }
+
 int main(int argc, char **argv)
 {
-    if (argc != 2)
-    {
-        printf("Usage : %s port\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-    start_server(atoi(argv[1]));
+    // if (argc != 2)
+    // {
+    //     printf("Usage : %s port\n", argv[0]);
+    //     return EXIT_FAILURE;
+    // }
+    // start_server(atoi(argv[1]));
 
-    return EXIT_SUCCESS;
+        return EXIT_SUCCESS;
 }

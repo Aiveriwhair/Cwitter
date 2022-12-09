@@ -80,6 +80,17 @@ void remove_message(messageList *messages, char *message)
         temp = temp->next;
     }
 }
+int messageList_length(messageList *messages)
+{
+    int length = 0;
+    messageList *temp = messages;
+    while (temp != NULL)
+    {
+        length++;
+        temp = temp->next;
+    }
+    return length;
+}
 
 /*********  CLIENTLIST  **********/
 clientList *init_clienList(Client *client)
@@ -135,8 +146,61 @@ void remove_client(clientList *cList, Client *client)
     }
 }
 
+char *client_to_string(Client *client)
+{
+    char *res = strcat(client->name, "\n");
+    res = strcat(res, clientList_to_string(client->subbedTo));
+    res = strcat(res, "\n");
+    res = strcat(res, messageList_to_string(client->messages));
+    res = strcat(res, "\n");
+    return res;
+}
+char *clients_to_string(clientList *clist)
+{
+    clientList *temp = clist;
+    char *res = "";
+    while (temp != NULL)
+    {
+        Client *current = temp->client;
+        res = strcat(res, client_to_string(current));
+        temp = temp->next;
+    }
+}
+
+char *clientList_to_string(clientList *clist)
+{
+    char *res = "";
+    clientList *temp = clist;
+    while (temp != NULL)
+    {
+        Client *current = temp->client;
+        res = strcat(strcat(res, current->name), " ");
+        temp = temp->next;
+    }
+    return res;
+}
+
+char *messageList_to_string(messageList *messages)
+{
+    char *res = "";
+    messageList *temp = messages;
+    // n \n
+    strcat(res, strcat(messageList_length(temp), "\n"));
+    while (temp != NULL)
+    {
+        // message \n
+        res = strcat(strcat(res, temp->content), "\n");
+        // receivers \n
+        res = strcat(res, clientList_to_string(temp->receivers));
+        strcat(res, "\n");
+
+        temp = temp->next;
+    }
+    return res;
+}
+
 int main(void)
 {
-    printf("Hello World!\r");
+    printf("Hello World!\n");
     return 0;
 }

@@ -33,9 +33,6 @@ int init_server(int port);
 int start_server(int port);
 void kill_server(SOCKET server_socket);
 
-// void save_as_dat(char *file_path);
-// void load_from_dat(char *file_path);
-
 /********   REQUEST HANDLING  ********/
 void handle_request(fd_set readfds, int server_socket);
 
@@ -50,5 +47,30 @@ void handle_login(char *buffer, int client_socket);
 /********   SERVER-CLIENT COMMUNICATION  ********/
 // void send_message(int client_socket, char *message);
 // void send_message_to_list(int client_socket, char *message, clientList *list);
+
+/********   DATA SAVE/LOAD  ********/
+
+/*
+DATA FORMAT :
+
+pseudo1
+SubbedTo pseudo list
+n-messages
+message1
+receiver1 receiver2 ...
+message2
+receiver1 receiver2 ...
+...
+pseudo2
+...
+
+*/
+
+void save_as(char *file_path, char *data);
+void load_from(char *file_path, clientList *clist);
+void testDB(clientList *clients);
+
+/********   DEBUG FUNCTIONS  ********/
+void gen_random_string(char *s, const int len);
 
 #endif
