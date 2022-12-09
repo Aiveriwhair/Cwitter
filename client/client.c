@@ -10,17 +10,74 @@
         }                          \
     } while (0)
 
+
+void handle_list(SOCKET client_socket, char *buffer){
+    printf("\nList connected users\n");
+    buffer[0] = '1';
+    printf("%s\n", buffer);
+    write_to_server(client_socket, buffer);
+}
+
+void handle_subscribe(SOCKET client_socket, char *buffer){
+
+}
+
+void handle_unsubscribe(SOCKET client_socket, char *buffer){
+
+}
+
+void handle_publish(SOCKET client_socket, char *buffer){
+
+}
+
 int request_server(SOCKET client_socket, char *buffer)
 {
-    printf("Enter your request: ");
-    fgets(buffer, BUFFER_SIZE, stdin);
-    buffer[strlen(buffer) - 1] = '\0';
 
-    int resultSend = send(client_socket, buffer, strlen(buffer), 0);
-    check_error(resultSend, "error in send()\n");
+    
+    int c;   
+    static struct termios oldt, newt;
 
-    return resultSend;
+    
+    tcgetattr( STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);          
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+    while((c=getchar())!= EOF){
+        if(c == '1'){
+            //List connecteds users
+            handle_list(client_socket, buffer);
+            return 1;
+        }
+        else if(c == '2'){
+            //Subscribe to user
+        }
+        else if(c == '3'){
+            //unsubscribe to user
+        }
+        else if(c == '4'){
+            //Publish message
+        }
+        else if(c == '5'){
+            //Quit
+        }
+        else{
+            printf("Wrong input\n");
+        }
+
+    }
+
+    // fgets(buffer, BUFFER_SIZE, stdin);
+    // buffer[strlen(buffer) - 1] = '\0';
+
+    // int resultSend = send(client_socket, buffer, strlen(buffer), 0);
+    // check_error(resultSend, "error in send()\n");
+
+    // return resultSend;
+    return 0;
 }
+
+
+
 
 int receive_server(SOCKET client_socket, char *buffer)
 {
@@ -37,22 +94,36 @@ int receive_server(SOCKET client_socket, char *buffer)
     return 1;
 }
 
-void start_client(char *ip, int port)
+void start_client(char *ip, int port,char* pseudo)
 {
     SOCKET socket_client = init_client(ip, port);
     char buffer[BUFFER_SIZE];
 
     fd_set readfds;
     int maxFD = socket_client;
+ 
+    write_to_server(socket_client, pseudo);
+    printf("Authentification successful \n");
 
+    
+    print_menu();
+    int print = 0;
     while (1)
     {
+
+        if (print)
+        {
+            //print_menu();
+        }
+
         FD_ZERO(&readfds);
         FD_SET(socket_client, &readfds);
         FD_SET(STDIN_FILENO, &readfds);
 
         int resultSelect = select(maxFD + 1, &readfds, NULL, NULL, NULL);
         check_error(resultSelect, "error in select()\n");
+
+        print=1;
 
         if (FD_ISSET(STDIN_FILENO, &readfds))
         {
@@ -95,13 +166,82 @@ int init_client(char *ip, int port)
     return socketClient;
 }
 
-void run()
+
+char* auth()
 {
-    // Login or create account
-    // If login, print all published messages
-    // If create account, print success
-    // Ask for user input
-    // Print server response
+    printf("1. Login\n");
+    printf("2. Create account\n");
+    printf("3. Quit\n\n");
+    
+    int c;   
+    static struct termios oldt, newt;
+
+    
+    tcgetattr( STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);          
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+    while((c=getchar())!= EOF){
+        if(c == '1'){
+            printf("\nLogin\n");
+            while(1){
+                char* pseudo = malloc(20);
+                printf("Enter your pseudo: ");
+                fgets(pseudo, 20, stdin);
+                if (strlen(pseudo) >6){
+                    printf("Pseudo too long\n");
+                    free(pseudo);
+                    continue;
+                }
+                else {
+                    printf("Pseudo: %s\n", pseudo);
+                    return pseudo;
+                }
+            }       
+        }
+        else if(c == '2'){
+            printf("\nCreate account\n");
+            while(1){
+                char* pseudo = malloc(20);
+                printf("Enter your pseudo: ");
+                fgets(pseudo, 20, stdin);
+                if (strlen(pseudo) >6){
+                    printf("Pseudo too long\n");
+                    free(pseudo);
+                    continue;
+                }
+                else {
+                    printf("Pseudo: %s\n", pseudo);
+                    return pseudo;
+                }
+            }
+        }
+        else if(c == '3'){
+            printf("\nQuit\n");
+            exit(0);
+        }
+        else{
+            printf("\nWrong input\n");
+        }
+
+    }     
+return "ERROR WHILE AUTH";
+}
+
+void write_to_server(SOCKET client_socket, char *buffer)
+{
+    int resultSend = send(client_socket, buffer, strlen(buffer), 0);
+    check_error(resultSend, "error in write to server send()\n");
+}
+
+void print_menu(){
+    printf("\n You can now use and navigate in Cwitter ! \n");
+    printf("\n------------------------- Menu -------------------------\n\n");
+    printf("1 ------ list all users of Cwitter, connected or not\n");
+    printf("2 ------ subscribe to pseudo's feed\n");
+    printf("3 ------ unsubscribe to pseudo's feed\n");
+    printf("4 ------ publish a message on your feed\n");
+    printf("5 ------ quit Cwitter\n\n\n");
 }
 
 int main(int argc, char **argv)
@@ -111,9 +251,9 @@ int main(int argc, char **argv)
         printf("Usage: %s <ip> <port> \n", argv[0]);
         return EXIT_FAILURE;
     }
-    printf("Welcome on Cwitter -----------\n\n\n");
-    start_client(argv[1], atoi(argv[2]));
-    run();
+    printf("\n\n\n----------- Welcome on Cwitter -----------\n\n\n");
+    char* pseudo = auth();
+    start_client(argv[1], atoi(argv[2]),pseudo);
 
     return EXIT_SUCCESS;
 }

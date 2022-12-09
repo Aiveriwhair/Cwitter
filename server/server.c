@@ -22,9 +22,10 @@ int start_server(int port)
     {
         FD_ZERO(&readfds);
         FD_SET(server_socket, &readfds);
-
+        printf("Waiting for new select resolution\n");
         int resultSelect = select(maxFD + 1, &readfds, NULL, NULL, NULL);
         check_error(resultSelect, "error in select()\n");
+        printf("Select resolved\n");
 
         if (FD_ISSET(server_socket, &readfds))
         {
@@ -37,14 +38,21 @@ int start_server(int port)
             printf("New client connected from %s:%d - socket %d\n", inet_ntoa(csin.sin_addr),
                    htons(csin.sin_port), csock);
 
+            char buffer[64];
+            int pseudo = recv(csock, buffer, BUFFER_SIZE - 1, 0);
+            printf("Pseudo is connected : %s\n", buffer);
+
             if (csock > maxFD)
             {
                 maxFD = csock;
             }
             FD_SET(csock, &readfds);
+
+            
         }
         else
         {
+            printf("New request\n");
             handle_request(readfds, maxFD);
         }
     }
@@ -74,71 +82,118 @@ int init_server(int port)
     return server_socket;
 }
 
-void handle_request(fd_set readfds, int server_socket)
+void handle_request(fd_set readfds, SOCKET server_socket)
 {
     char buffer[BUFFER_SIZE];
     int resultRecv = recv(server_socket, buffer, BUFFER_SIZE, 0);
-    check_error(resultRecv, "error in recv()\n");
-
+    check_error(resultRecv, "error in handle_request recv()\n");
+    printf("%s\n", buffer);
     switch (buffer[0])
     {
-    case 0:
-        printf("SUBSCRIBE request\n");
-        handle_subscribe(buffer, server_socket);
-        break;
     case 1:
-        printf("UNSUBSCRIBE request\n");
-        handle_unsubscribe(buffer, server_socket);
-        break;
-    case 2:
-        printf("PUBLISH request\n");
-        handle_publish(buffer, server_socket);
-        break;
-    case 3:
         printf("LIST request\n");
         handle_list(buffer, server_socket);
         break;
+    case 2:
+        printf("SUBSCRIBE request\n");
+        handle_subscribe(buffer, server_socket);
+        break;
+    case 3:
+        printf("UNSUBSCRIBE request\n");
+        handle_unsubscribe(buffer, server_socket);
+        break;
     case 4:
+        printf("PUBLISH request\n");
+        handle_publish(buffer, server_socket);
+        break;
+    case 5:
         printf("QUIT request\n");
         handle_quit(buffer, server_socket);
         break;
-    case 5:
-        printf("NEW ACCOUNT request\n");
+    case 6:
+        printf("NEW_ACCOUNT request\n");
         handle_new_account(buffer, server_socket);
         break;
-    case 6:
+    case 7:
         printf("LOGIN request\n");
         handle_login(buffer, server_socket);
-        break;
+        break;  
     default:
         printf("Unknown request\n");
         break;
     }
 }
+
+
 void kill_server(SOCKET server_socket)
 {
     close(server_socket);
 }
-void handle_subscribe(char *buffer, int client_socket)
+
+
+void handle_subscribe(char *buffer, SOCKET client_socket)
 {
+    int n = recv(client_socket, buffer, BUFFER_SIZE, 0);
 }
+
+
 void handle_unsubscribe(char *buffer, int client_socket)
 {
+
 }
+
+
 void handle_publish(char *buffer, int client_socket)
 {
+
 }
+
+
 void handle_list(char *buffer, int client_socket)
 {
+    //on récupere le name de chaque client de la liste clients 
+    for (clientList *clientsList = clients; clientsList != NULL; clientsList = clientsList->next)
+    {
+        //on remplit le buffer avec le name du client
+        buffer = strcat(buffer, clientsList->client->name);
+        buffer = strcat(buffer, "\n");
+    }
+    //on envoie le buffer au client
+    int n =send(client_socket, buffer, BUFFER_SIZE, 0);
+    check_error(n, "error in handle_list send()\n");
 }
+
+
 void handle_quit(char *buffer, int client_socket)
 {
+
 }
+
+
 void handle_new_account(char *buffer, int client_socket)
 {
+
 }
+
+
 void handle_login(char *buffer, int client_socket)
 {
+
+}
+
+
+Client* get_client_by_socket(SOCKET client_socket)
+{
+    clientList* clientsList= clients;
+    while(clientsList!=NULL)
+    {
+        if(clientsList->client->socket==client_socket)
+        {
+            return clientsList->client;
+        }
+        clientsList=clientsList->next;
+    }
+    return NULL;
 }
 
 void save_as(FILE *file, char *data)
@@ -218,7 +273,7 @@ void testDB_save(char *fpath, clientList *Users)
 
 clientList *testDB_load(char *fpath)
 {
-    return load_from(fpath);
+    //return load_from(fpath);
 }
 
 clientList *clientList_tostring_test(bool prints)
@@ -283,14 +338,14 @@ clientList *clients_tostring_test(bool prints)
 
 int main(int argc, char **argv)
 {
-    // if (argc != 2)
-    // {
-    //     printf("Usage : %s port\n", argv[0]);
-    //     return EXIT_FAILURE;
-    // }
-    // start_server(atoi(argv[1]));
+    if (argc != 2)
+    {
+        printf("Usage : %s port\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+    start_server(atoi(argv[1]));
 
-    DB_save("db.txt", clients_tostring_test(false));
+    //DB_save("db.txt", clients_tostring_test(false));
     // testDB_save("dbloaded.txt", Users);
     return EXIT_SUCCESS;
 }

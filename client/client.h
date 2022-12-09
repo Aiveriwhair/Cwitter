@@ -11,26 +11,37 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
+#include <termios.h> 
+#include <stdbool.h>
 
 #define BUFFER_SIZE 1024
 #define SOCKET int
 
 enum requestType
 {
-    SUBSCRIBE = 0,
-    UNSUBSCRIBE = 1,
-    PUBLISH = 2,
-    LIST = 3,
-    QUIT = 4,
-    NEW_ACCOUNT = 5,
-    LOGIN = 6,
+    LIST = 1,
+    SUBSCRIBE = 2,
+    UNSUBSCRIBE = 3,
+    PUBLISH = 4,
+    QUIT = 5,
+    NEW_ACCOUNT = 6,
+    LOGIN = 7,
 };
-void run();
 
 /**********     CLIENT    **********/
-void start_client(char *ip, int port);
+char* auth();
+void start_client(char *ip, int port, char *pseudo);
 int init_client(char *ip, int port);
 void kill_client(SOCKET client_socket);
+
+/**********     TO SERVER    **********/
+void write_to_server(SOCKET client_socket, char *buffer);
+void handle_list(SOCKET client_socket, char *buffer);
+void handle_subscribe(SOCKET client_socket, char *buffer);
+void handle_unsubscribe(SOCKET client_socket, char *buffer);
+void handle_publish(SOCKET client_socket, char *buffer);
+
+
 
 /**********     REQUEST HANDLING    **********/
 int request_server(SOCKET client_socket, char *buffer);
@@ -39,4 +50,5 @@ int receive_server(SOCKET client_socket, char *buffer);
 /**********     UI    **********/
 void print_welcome();
 void print_menu();
+
 #endif

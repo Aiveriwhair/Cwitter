@@ -2,13 +2,13 @@ EXEC = server.o client.o server
 all: ${EXEC}
 
 client.o : client.c client.h
-	gcc  -g -c  client.c
+	gcc  -g -c  client.c -lm
 
 server.o : server.c server.h client.h
-	gcc  -g -c  server.c
+	gcc  -g -c  server.c -lm
 
 server : server.o client.o
-	gcc server.o client.o -o server 
+	gcc server.o client.o -o server -lm
 
 clean:
 	rm -f server client *.o *~

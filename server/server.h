@@ -18,13 +18,13 @@ typedef int SOCKET;
 
 enum requestType
 {
-    SUBSCRIBE = 0,
-    UNSUBSCRIBE = 1,
-    PUBLISH = 2,
-    LIST = 3,
-    QUIT = 4,
-    NEW_ACCOUNT = 5,
-    LOGIN = 6,
+    LIST = 1,
+    SUBSCRIBE = 2,
+    UNSUBSCRIBE = 3,
+    PUBLISH = 4,
+    QUIT = 5,
+    NEW_ACCOUNT = 6,
+    LOGIN = 7,
 };
 
 static clientList *clients;
@@ -45,7 +45,12 @@ void handle_quit(char *buffer, int client_socket);
 void handle_new_account(char *buffer, int client_socket);
 void handle_login(char *buffer, int client_socket);
 
+/********   AUX REQUEST HANDLERS ********/
+
+Client *get_client_by_socket(SOCKET client_socket);
+
 /********   SERVER-CLIENT COMMUNICATION  ********/
+
 // void send_message(int client_socket, char *message);
 // void send_message_to_list(int client_socket, char *message, clientList *list);
 
@@ -80,5 +85,7 @@ clientList *clientList_tostring_test(bool prints);
 messageList *messageList_tostring_test(bool prints);
 Client *client_tostring_test(bool prints);
 clientList *clients_tostring_test(bool prints);
+
+
 
 #endif
