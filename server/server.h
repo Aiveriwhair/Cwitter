@@ -68,9 +68,13 @@ pseudo2
 
 void save_as(char *file_path, char *data);
 void load_from(char *file_path, clientList *clist);
-void testDB(clientList *clients);
 
-/********   DEBUG FUNCTIONS  ********/
-void gen_random_string(char *s, const int len);
+/***********    TESTS   ***********/
+void testDB_save();
+void testDB_load();
+clientList *clientList_tostring_test(bool prints);
+messageList *messageList_tostring_test(bool prints);
+Client *client_tostring_test(bool prints);
+Client *clients_tostring_test(bool prints);
 
 #endif

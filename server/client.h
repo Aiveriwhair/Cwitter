@@ -5,8 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 
-#define PSEUDO_SIZE 6
+#define PSEUDO_SIZE 7
+#define charS sizeof(char)
+#define intS sizeof(int)
 typedef int SOCKET;
 
 typedef struct clientList
@@ -43,7 +46,7 @@ void add_message(messageList *messages, char *message, clientList *receivers);
 void remove_message(messageList *messages, char *message);
 int messageList_length(messageList *messages);
 
-clientList *init_clienList(Client *client);
+clientList *init_clientList(Client *client);
 void delete_clientList(clientList *clist);
 void add_client(clientList *clist, Client *client);
 void remove_client(clientList *clientList, Client *client);
@@ -52,4 +55,8 @@ char *client_to_string(Client *client);
 char *clients_to_string(clientList *clients);
 char *clientList_to_string(clientList *clist);
 char *messageList_to_string(messageList *messages);
+
+/***********    OTHER   ***********/
+int intlen(int n);
+char *intToString(int n);
 #endif

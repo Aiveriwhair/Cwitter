@@ -153,19 +153,68 @@ void save_as(char *file_path, char *data)
     fclose(file);
 }
 
-// void testDB()
-// {
-//     clientList *clients = init_clientList();
-//     Client *c1 = init_client(1, "William", );
-//     Client *c2 = init_client(2, "Jerem");
-//     Client *c3 = init_client(3, "Lucas");
-//     Client *c4 = init_client(4, "Benjamin");
+void testDB_save()
+{
+    clientList *allUsers = init_clientList(NULL);
+    add_client(allUsers, init_client(0, "Willia", NULL, NULL));
+    add_client(allUsers, init_client(0, "Lea", NULL, NULL));
+    add_client(allUsers, init_client(0, "Margot", NULL, NULL));
+    add_client(allUsers, init_client(0, "Jerem", NULL, NULL));
+    add_client(allUsers, init_client(0, "Lucas", NULL, NULL));
+    add_client(allUsers, init_client(0, "Benja", NULL, NULL));
+    add_client(allUsers, init_client(0, "Lony", NULL, NULL));
+    add_client(allUsers, init_client(0, "Luiza", NULL, NULL));
 
-//     char *data = clients_to_string(clients);
+    char *data = clients_to_string(clients);
+    char *file_path = "db.txt";
+    save_as(file_path, data);
+}
 
-//     char *file_path = "db.txt";
-//     save_as(file_path, data);
-// }
+clientList *clientList_tostring_test(bool prints)
+{
+    clientList *clist = init_clientList(NULL);
+    add_client(clist, init_client(0, "Willia", NULL, NULL));
+    add_client(clist, init_client(0, "Margot", NULL, NULL));
+    add_client(clist, init_client(0, "Lucas", NULL, NULL));
+    add_client(clist, init_client(0, "Jeremy", NULL, NULL));
+    add_client(clist, init_client(0, "Benjam", NULL, NULL));
+    if (prints)
+    {
+        printf("clientList_tostring_test : %s", clientList_to_string(clist));
+    }
+    return clist;
+}
+
+messageList *messageList_tostring_test(bool prints)
+{
+    clientList *receivers = clientList_tostring_test(false);
+    messageList *mlist = init_messageList(NULL, NULL);
+    add_message(mlist, "Message1", receivers);
+    add_message(mlist, "Message2", receivers);
+    add_message(mlist, "Message3", receivers);
+    add_message(mlist, "Message4", receivers);
+    if (prints)
+    {
+        char *str = messageList_to_string(mlist);
+        printf("messageList_tostring_test : %s", str);
+        free(str);
+    }
+    return mlist;
+}
+
+Client *client_tostring_test(bool prints)
+{
+    clientList *receivers = clientList_tostring_test(false);
+    messageList *mlist = messageList_tostring_test(false);
+    Client *cli = init_client(0, "Willia", mlist, receivers);
+    if (prints)
+    {
+        char *str = client_to_string(cli);
+        printf("clientTest:\n%s", str);
+        free(str);
+    }
+    return cli;
+}
 
 int main(int argc, char **argv)
 {
@@ -176,5 +225,6 @@ int main(int argc, char **argv)
     // }
     // start_server(atoi(argv[1]));
 
-        return EXIT_SUCCESS;
+    client_tostring_test(true);
+    return EXIT_SUCCESS;
 }

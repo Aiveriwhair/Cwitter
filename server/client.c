@@ -49,9 +49,15 @@ void delete_messageList(messageList *messages)
     }
 }
 
-void add_message(messageList *messages, char *message, clientList *receivers)
+void add_message(messageList *mlist, char *message, clientList *receivers)
 {
-    messageList *temp = messages;
+    if (mlist->content == NULL)
+    {
+        mlist->content = message;
+        mlist->receivers = receivers;
+        return;
+    }
+    messageList *temp = mlist;
     while (temp->next != NULL)
     {
         temp = temp->next;
@@ -93,12 +99,12 @@ int messageList_length(messageList *messages)
 }
 
 /*********  CLIENTLIST  **********/
-clientList *init_clienList(Client *client)
+clientList *init_clientList(Client *client)
 {
-    clientList *subs = malloc(sizeof(clientList));
-    subs->client = client;
-    subs->next = NULL;
-    return subs;
+    clientList *clist = malloc(sizeof(clientList));
+    clist->client = client;
+    clist->next = NULL;
+    return clist;
 }
 
 void delete_clientList(clientList *cList)
@@ -115,12 +121,17 @@ void delete_clientList(clientList *cList)
 
 void add_client(clientList *cList, Client *client)
 {
+    if (cList->client == NULL)
+    {
+        cList->client = client;
+        return;
+    }
     clientList *temp = cList;
     while (temp->next != NULL)
     {
         temp = temp->next;
     }
-    temp->next = init_clienList(client);
+    temp->next = init_clientList(client);
 }
 
 void remove_client(clientList *cList, Client *client)
@@ -148,33 +159,53 @@ void remove_client(clientList *cList, Client *client)
 
 char *client_to_string(Client *client)
 {
-    char *res = strcat(client->name, "\n");
-    res = strcat(res, clientList_to_string(client->subbedTo));
-    res = strcat(res, "\n");
-    res = strcat(res, messageList_to_string(client->messages));
-    res = strcat(res, "\n");
+    // pseudo
+    char *res = malloc(charS * strlen(client->name) + charS);
+    res = strcat(strcat(res, client->name), "\n");
+
+    // receivers \n
+    char *subbedtoStr = clientList_to_string(client->subbedTo);
+    res = realloc(res, charS * strlen(res) + charS * strlen(subbedtoStr) + charS);
+    res = strcat(res, subbedtoStr);
+
+    // messages
+    char *messagesStr = messageList_to_string(client->messages);
+    res = realloc(res, charS * strlen(res) + charS * strlen(messagesStr) + charS);
+    res = strcat(res, messagesStr);
     return res;
 }
 char *clients_to_string(clientList *clist)
 {
     clientList *temp = clist;
-    char *res = "";
+    char *res = malloc(0);
     while (temp != NULL)
     {
         Client *current = temp->client;
-        res = strcat(res, client_to_string(current));
+        char *currentStr = client_to_string(current);
+        res = realloc(res, charS * strlen(res) + charS * strlen(currentStr) + charS);
+        res = strcat(res, currentStr);
         temp = temp->next;
     }
+    return res;
 }
 
 char *clientList_to_string(clientList *clist)
 {
-    char *res = "";
+    char *res = malloc(0);
     clientList *temp = clist;
     while (temp != NULL)
     {
         Client *current = temp->client;
-        res = strcat(strcat(res, current->name), " ");
+        // printf("realloc %d bytes\n", charS * strlen(res) + charS * strlen(current->name) + charS);
+        res = (char *)realloc(res, charS * strlen(res) + charS * strlen(current->name) + charS);
+        if (temp->next == NULL)
+        {
+            strcat(strcat(res, current->name), "\n");
+        }
+        else
+        {
+            strcat(strcat(res, current->name), " ");
+        }
         temp = temp->next;
     }
     return res;
@@ -182,25 +213,35 @@ char *clientList_to_string(clientList *clist)
 
 char *messageList_to_string(messageList *messages)
 {
-    char *res = "";
     messageList *temp = messages;
     // n \n
-    strcat(res, strcat(messageList_length(temp), "\n"));
+    char *res = (char *)malloc(intlen(messageList_length(temp)) + 1);
+    strcat(strcat(res, intToString(messageList_length(temp))), "\n");
     while (temp != NULL)
     {
         // message \n
+        res = realloc(res, charS * strlen(res) + charS * strlen(temp->content) + charS);
         res = strcat(strcat(res, temp->content), "\n");
+
         // receivers \n
-        res = strcat(res, clientList_to_string(temp->receivers));
-        strcat(res, "\n");
+        char *receiversStr = clientList_to_string(temp->receivers);
+        res = realloc(res, charS * strlen(res) + charS * strlen(receiversStr) + charS);
+        res = strcat(res, receiversStr);
 
         temp = temp->next;
     }
     return res;
 }
 
-int main(void)
+char *intToString(int n)
 {
-    printf("Hello World!\n");
-    return 0;
+    int len = intlen(n);
+    char *res = malloc(len + 1);
+    sprintf(res, "%d", n);
+    return res;
+}
+
+int intlen(int n)
+{
+    return floor(log10(abs(n))) + 1;
 }
