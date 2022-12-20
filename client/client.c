@@ -3,7 +3,7 @@
 #define check_error(expr, userMsg) \
     do                             \
     {                              \
-        if (expr == -1)            \
+        if (expr < 0)            \
         {                          \
             perror(userMsg);       \
             exit(errno);           \
@@ -13,8 +13,8 @@
 
 void handle_list(SOCKET client_socket, char *buffer){
     printf("\nList connected users\n");
-    buffer[0] = '1';
-    printf("%s\n", buffer);
+    //on met 1 en entete du buffer
+    buffer[0] = '1';    
     write_to_server(client_socket, buffer);
 }
 
@@ -83,6 +83,7 @@ int receive_server(SOCKET client_socket, char *buffer)
 {
     int resultRecv = recv(client_socket, buffer, BUFFER_SIZE, 0);
     check_error(resultRecv, "error in recv()\n");
+    printf("Buffer : %s\n", buffer);
 
     if (resultRecv == 0)
     {
@@ -104,10 +105,9 @@ void start_client(char *ip, int port,char* pseudo)
  
     write_to_server(socket_client, pseudo);
     printf("Authentification successful \n");
-
-    
     print_menu();
     int print = 0;
+    FD_ZERO(&readfds);
     while (1)
     {
 
@@ -116,7 +116,6 @@ void start_client(char *ip, int port,char* pseudo)
             //print_menu();
         }
 
-        FD_ZERO(&readfds);
         FD_SET(socket_client, &readfds);
         FD_SET(STDIN_FILENO, &readfds);
 
@@ -186,15 +185,18 @@ char* auth()
             printf("\nLogin\n");
             while(1){
                 char* pseudo = malloc(20);
+                char* name = malloc(20);
+                pseudo[0] = '7';
                 printf("Enter your pseudo: ");
-                fgets(pseudo, 20, stdin);
-                if (strlen(pseudo) >6){
+                fgets(name, 20, stdin);
+                if (strlen(name) >6){
                     printf("Pseudo too long\n");
-                    free(pseudo);
+                    free(name);
                     continue;
                 }
                 else {
-                    printf("Pseudo: %s\n", pseudo);
+                    pseudo = strcat(pseudo, name);
+                    printf("Pseudo: %s\n", name);
                     return pseudo;
                 }
             }       
@@ -203,15 +205,19 @@ char* auth()
             printf("\nCreate account\n");
             while(1){
                 char* pseudo = malloc(20);
+                char* name = malloc(20);
+                pseudo[0] = '6';
                 printf("Enter your pseudo: ");
-                fgets(pseudo, 20, stdin);
-                if (strlen(pseudo) >6){
+                fgets(name, 20, stdin);
+                if (strlen(name) >6){
                     printf("Pseudo too long\n");
-                    free(pseudo);
+                    free(name);
                     continue;
                 }
                 else {
+                    pseudo = strcat(pseudo, name);
                     printf("Pseudo: %s\n", pseudo);
+                    char* buffer = malloc(30);
                     return pseudo;
                 }
             }

@@ -10,6 +10,8 @@
         }                          \
     } while (0)
 
+clientList *clients;
+
 int start_server(int port)
 {
     printf("Starting server on port %d\n", port);
@@ -17,11 +19,11 @@ int start_server(int port)
 
     int maxFD = server_socket;
     fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(server_socket, &readfds);
 
     while (1)
     {
-        FD_ZERO(&readfds);
-        FD_SET(server_socket, &readfds);
         printf("Waiting for new select resolution\n");
         int resultSelect = select(maxFD + 1, &readfds, NULL, NULL, NULL);
         check_error(resultSelect, "error in select()\n");
@@ -38,22 +40,21 @@ int start_server(int port)
             printf("New client connected from %s:%d - socket %d\n", inet_ntoa(csin.sin_addr),
                    htons(csin.sin_port), csock);
 
-            char buffer[64];
-            int pseudo = recv(csock, buffer, BUFFER_SIZE - 1, 0);
-            printf("Pseudo is connected : %s\n", buffer);
 
             if (csock > maxFD)
             {
                 maxFD = csock;
             }
             FD_SET(csock, &readfds);
-
             
+            handle_request(readfds, csock);
+
         }
         else
         {
             printf("New request\n");
             handle_request(readfds, maxFD);
+           
         }
     }
     kill_server(server_socket);
@@ -85,36 +86,36 @@ int init_server(int port)
 void handle_request(fd_set readfds, SOCKET server_socket)
 {
     char buffer[BUFFER_SIZE];
-    int resultRecv = recv(server_socket, buffer, BUFFER_SIZE, 0);
+    int resultRecv = recv(server_socket, buffer, BUFFER_SIZE-1, 0);
     check_error(resultRecv, "error in handle_request recv()\n");
-    printf("%s\n", buffer);
+    printf("Request type : %c\n", buffer[0]);
     switch (buffer[0])
     {
-    case 1:
+    case '1':
         printf("LIST request\n");
         handle_list(buffer, server_socket);
         break;
-    case 2:
+    case '2':
         printf("SUBSCRIBE request\n");
         handle_subscribe(buffer, server_socket);
         break;
-    case 3:
+    case '3':
         printf("UNSUBSCRIBE request\n");
         handle_unsubscribe(buffer, server_socket);
         break;
-    case 4:
+    case '4':
         printf("PUBLISH request\n");
         handle_publish(buffer, server_socket);
         break;
-    case 5:
+    case '5':
         printf("QUIT request\n");
         handle_quit(buffer, server_socket);
         break;
-    case 6:
+    case '6':
         printf("NEW_ACCOUNT request\n");
         handle_new_account(buffer, server_socket);
         break;
-    case 7:
+    case '7':
         printf("LOGIN request\n");
         handle_login(buffer, server_socket);
         break;  
@@ -149,34 +150,65 @@ void handle_publish(char *buffer, int client_socket)
 }
 
 
-void handle_list(char *buffer, int client_socket)
+void handle_list(char *buffer, SOCKET client_socket)
 {
-    //on récupere le name de chaque client de la liste clients 
-    for (clientList *clientsList = clients; clientsList != NULL; clientsList = clientsList->next)
+    if (clients == NULL)
     {
-        //on remplit le buffer avec le name du client
-        buffer = strcat(buffer, clientsList->client->name);
-        buffer = strcat(buffer, "\n");
+        printf("No clients connected\n");
+        return;
     }
-    //on envoie le buffer au client
-    int n =send(client_socket, buffer, BUFFER_SIZE, 0);
+    printf("clients : %s\n", clients->client->name);
+    
+    char *response = malloc(sizeof(char) * BUFFER_SIZE);
+    clientList *tmp = clients;
+    for (tmp ; tmp != NULL; tmp = tmp->next)
+    {
+        printf("client name : %s\n", tmp->client->name);
+        response = strcat(response, tmp->client->name);
+    }
+    response = strcat(response, "\n");
+
+    printf("buffer in list : %s\n", response);
+    int n =send(client_socket, response, BUFFER_SIZE, 0);
     check_error(n, "error in handle_list send()\n");
 }
 
 
-void handle_quit(char *buffer, int client_socket)
+void handle_quit(char *buffer, SOCKET client_socket)
 {
 
 }
 
 
-void handle_new_account(char *buffer, int client_socket)
+void handle_new_account(char *buffer, SOCKET client_socket)
 {
+    printf("New account request\n");
+    buffer = buffer + 1;
+    char *name = malloc(sizeof(char) * 6);
+    name = strncpy(name, buffer, 5);
+    printf("name : %s\n", name);
+    Client *newClient = init_client(client_socket,name, NULL,NULL);
+    if (clients == NULL)
+    {
+        printf("clients is null\n");
+        clients = init_clientList(newClient);
+    }
+    else
+    {
+        printf("clients is not null\n");
+        add_client(clients, newClient);
+    }
+    printf("New client added in clients \n");
+
+    clientList *temp = clients;
+    for (temp; temp != NULL; temp = temp->next){
+        printf("clients : %s\n", temp->client->name);
+    }
 
 }
 
 
-void handle_login(char *buffer, int client_socket)
+void handle_login(char *buffer, SOCKET client_socket)
 {
 
 }

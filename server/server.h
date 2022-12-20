@@ -27,7 +27,6 @@ enum requestType
     LOGIN = 7,
 };
 
-static clientList *clients;
 
 /********   SERVER  ********/
 int init_server(int port);
