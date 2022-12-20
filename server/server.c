@@ -25,6 +25,12 @@ int start_server(int port)
     while (1)
     {
         printf("Waiting for new select resolution\n");
+
+        for (int i = server_socket; i< maxFD + 1; i++)
+        {
+            FD_SET(i, &readfds);
+        }
+
         int resultSelect = select(maxFD + 1, &readfds, NULL, NULL, NULL);
         check_error(resultSelect, "error in select()\n");
         printf("Select resolved\n");
@@ -40,21 +46,23 @@ int start_server(int port)
             printf("New client connected from %s:%d - socket %d\n", inet_ntoa(csin.sin_addr),
                    htons(csin.sin_port), csock);
 
-
+            handle_request(readfds, csock);
             if (csock > maxFD)
             {
                 maxFD = csock;
             }
-            FD_SET(csock, &readfds);
-            
-            handle_request(readfds, csock);
-
         }
         else
         {
             printf("New request\n");
-            handle_request(readfds, maxFD);
-           
+            for (int i=0; i<maxFD + 1; i++)
+            {
+                if (FD_ISSET(i, &readfds))
+                {
+                    printf("Request from socket %d\n", i);
+                    handle_request(readfds, i);
+                }
+            }           
         }
     }
     kill_server(server_socket);
