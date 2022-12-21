@@ -144,76 +144,68 @@ void kill_server(SOCKET server_socket)
 
 void handle_subscribe(char *buffer, SOCKET client_socket)
 {
-    char *response = malloc(sizeof(char) * BUFFER_SIZE);
+    // Get current client
+    Client *currentClient = get_client_by_socket(client_socket);
+    if (currentClient == NULL)
+    {
+        printf("SERVER ERROR\n");
+        return;
+    }
+
+    // Create response buffer
+    char *response = malloc(BUFFER_SIZE);
     memset(response, '\0', BUFFER_SIZE);
-    // reading name from buffer
-    char *name = malloc(sizeof(char) * BUFFER_SIZE);
+
+    // Create sub name buffer & put name in it
+    char *name = malloc(BUFFER_SIZE);
     memset(name, '\0', BUFFER_SIZE);
-    int i = 1;
+    name = strcpy(name, buffer + 1);
 
-    int find = 0;
-
-    while (buffer[i] != '\0')
+    // Check if already subscribed
+    Client *sub = get_client_by_name(currentClient->subbedTo, name);
+    // If yes, send error response
+    if (sub != NULL)
     {
-        name[i - 1] = buffer[i];
-        i++;
+        printf("Client already subscribed to %s\n", name);
+        // Send error response
+        return;
     }
+    // If no, continue
+    sub = get_client_by_name(clients, name);
 
-    // checking if this username exists
-    clientList *tmp = clients;
-
-    for (tmp; tmp != NULL; tmp = tmp->next)
+    // Check if trying to sub to self
+    if (sub == currentClient)
     {
-        if (strcmp(tmp->client->name, name) == 0)
-        {
-            find = 1;
-            if (tmp->client->socket == client_socket)
-            {
-                printf("Client try to subs to himself\n");
-                response[0] = 'e';
-                response[1] = 's';
-                int n = send(client_socket, response, BUFFER_SIZE, 0);
-                check_error(n, "error in handle_subs send()\n");
-            }
-            else
-            {
-                // adding client to the list of subscribers
-                Client *toSub = get_client_by_name(name);
-                if (tmp->client->subbedTo == NULL)
-                {
-                    printf("subbedTo is null\n");
-                    tmp->client->subbedTo = init_clientList(toSub);
-                    response[0] = '2';
-                    // adding name to sub in response
-                    char *response_name = tmp->client->name;
-                    response = strcat(response, response_name);
-                }
-                else
-                {
-                    printf("subbedTo is not null\n");
-                    add_client(tmp->client->subbedTo, toSub);
-                    response[0] = '2';
-                    // adding name to sub in response
-                    char *response_name = tmp->client->name;
-                    response = strcat(response, response_name);
-                }
-
-                printf("Printing subbedTo list\n");
-                for (clientList *tmp2 = clients->client->subbedTo; tmp2 != NULL; tmp2 = tmp2->next)
-                {
-                    printf("%s \n ", tmp2->client->name);
-                }
-            }
-        }
-    }
-
-    if (find == 0)
-    {
-        printf("Client %s doesn't exist\n", name);
+        printf("Client tried to self subscribe\n");
         response[0] = 'e';
-        response[1] = 'n';
+        response[1] = 's';
         int n = send(client_socket, response, BUFFER_SIZE, 0);
+        check_error(n, "error in handle_subs send()\n");
+        return;
     }
+
+    // Check if sub name exists
+    // If no, send error response
+    if (sub == NULL)
+    {
+        printf("Client %s doesn't exist", name);
+        // Send error response
+        return;
+    }
+    // If yes, add to subbedTo list
+    add_client(currentClient->subbedTo, sub);
+
+    printf("Printing subbedTo list :\n");
+    printf("%s\n", clientList_to_string(currentClient->subbedTo));
+
+    response[0] = '2';
+    strcat(response + 1, name);
+    int n = send(client_socket, response, BUFFER_SIZE, 0);
+    check_error(n, "error in handle_subs send()\n");
+    printf("Client subed to %s\n", name);
+
+    free(name);
+    free(response);
 }
 
 void handle_unsubscribe(char *buffer, SOCKET client_socket)
@@ -250,7 +242,7 @@ void handle_unsubscribe(char *buffer, SOCKET client_socket)
             }
             else
             {
-                Client *toUnSub = get_client_by_name(name);
+                Client *toUnSub = get_client_by_name(clients, name);
                 if (tmp->client->subbedTo == NULL)
                 {
                     printf("subbedTo is null\n");
@@ -362,7 +354,7 @@ void handle_login(char *buffer, SOCKET client_socket)
     buffer = buffer + 1;
     char *name = malloc(sizeof(char) * BUFFER_SIZE);
     name = strcpy(name, buffer);
-    current = get_client_by_name(name);
+    // current = get_client_by_name(name);
 
     if (current == NULL) // If no,
     {
@@ -399,9 +391,9 @@ Client *get_client_by_socket(SOCKET client_socket)
     return NULL;
 }
 
-Client *get_client_by_name(char *name)
+Client *get_client_by_name(clientList *cList, char *name)
 {
-    clientList *clientsList = clients;
+    clientList *clientsList = cList;
     while (clientsList != NULL)
     {
         if (strcmp(clientsList->client->name, name) == 0)
@@ -412,6 +404,20 @@ Client *get_client_by_name(char *name)
     }
     return NULL;
 }
+
+// Client *get_client_by_name(char *name)
+// {
+//     clientList *clientsList = clients;
+//     while (clientsList != NULL)
+//     {
+//         if (strcmp(clientsList->client->name, name) == 0)
+//         {
+//             return clientsList->client;
+//         }
+//         clientsList = clientsList->next;
+//     }
+//     return NULL;
+// }
 
 void save_as(FILE *file, char *data)
 {

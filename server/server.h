@@ -27,7 +27,6 @@ enum requestType
     LOGIN = 7,
 };
 
-
 /********   SERVER  ********/
 int init_server(int port);
 int start_server(int port);
@@ -47,7 +46,7 @@ void handle_login(char *buffer, int client_socket);
 /********   AUX REQUEST HANDLERS ********/
 
 Client *get_client_by_socket(SOCKET client_socket);
-Client *get_client_by_name(char *name);
+Client *get_client_by_name(clientList *clist, char *name);
 
 /********   SERVER-CLIENT COMMUNICATION  ********/
 
@@ -85,7 +84,5 @@ clientList *clientList_tostring_test(bool prints);
 messageList *messageList_tostring_test(bool prints);
 Client *client_tostring_test(bool prints);
 clientList *clients_tostring_test(bool prints);
-
-
 
 #endif
