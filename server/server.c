@@ -95,7 +95,6 @@ void handle_request(fd_set readfds, SOCKET server_socket)
 {
     char *buffer = malloc(BUFFER_SIZE * sizeof(char));
     memset(buffer, '\0', BUFFER_SIZE);
-    printf("before recv() buffer : %s\n", buffer);
     int resultRecv = recv(server_socket, buffer, BUFFER_SIZE - 1, 0);
     check_error(resultRecv, "error in handle_request recv()\n");
     printf("Request type : %c\n", buffer[0]);
@@ -146,8 +145,10 @@ void kill_server(SOCKET server_socket)
 void handle_subscribe(char *buffer, SOCKET client_socket)
 {
     char *response = malloc(sizeof(char) * BUFFER_SIZE);
+    memset(response, '\0', BUFFER_SIZE);
     // reading name from buffer
     char *name = malloc(sizeof(char) * BUFFER_SIZE);
+    memset(name, '\0', BUFFER_SIZE);
     int i = 1;
 
     int find = 0;
@@ -172,7 +173,7 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
                 response[0] = 'e';
                 response[1] = 's';
                 int n = send(client_socket, response, BUFFER_SIZE, 0);
-                check_error(n, "error in handle_list send()\n");
+                check_error(n, "error in handle_subs send()\n");
             }
             else
             {
@@ -198,7 +199,7 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
                 }
 
                 printf("Printing subbedTo list\n");
-                for (clientList *tmp2 = tmp->client->subbedTo; tmp2 != NULL; tmp2 = tmp2->next)
+                for (clientList *tmp2 = clients->client->subbedTo; tmp2 != NULL; tmp2 = tmp2->next)
                 {
                     printf("%s \n ", tmp2->client->name);
                 }
@@ -215,9 +216,74 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
     }
 }
 
-void handle_unsubscribe(char *buffer, int client_socket)
+void handle_unsubscribe(char *buffer, SOCKET client_socket)
 {
-    // jeremy
+    char *response = malloc(sizeof(char) * BUFFER_SIZE);
+
+    // reading name from buffer
+    char *name = malloc(sizeof(char) * BUFFER_SIZE);
+    int i = 1;
+
+    int find = 0;
+
+    while (buffer[i] != '\0')
+    {
+        name[i - 1] = buffer[i];
+        i++;
+    }
+
+    // checking if this username exists
+    clientList *tmp = clients;
+
+    for (tmp; tmp != NULL; tmp = tmp->next)
+    {
+        if (strcmp(tmp->client->name, name) == 0)
+        {
+            find = 1;
+            if (tmp->client->socket == client_socket)
+            {
+                printf("Client try to unsub to himself\n");
+                response[0] = 'e';
+                response[1] = 'u';
+                int n = send(client_socket, response, BUFFER_SIZE, 0);
+                check_error(n, "error in handle_unsubs send()\n");
+            }
+            else
+            {
+                Client *toUnSub = get_client_by_name(name);
+                if (tmp->client->subbedTo == NULL)
+                {
+                    printf("subbedTo is null\n");
+                }
+                else
+                {
+                    printf("subbedTo is not null\n");
+                    printf("Removing client from subbedTo list\n");
+                    remove_client(tmp->client->subbedTo, toUnSub);
+                    response[0] = '3';
+                    char *response_name = tmp->client->name;
+                    response = strcat(response, response_name);
+                    int n = send(client_socket, response, BUFFER_SIZE, 0);
+                    check_error(n, "error in handle_unsubs send()\n");
+                }
+
+                printf("Printing subbedTo list\n");
+
+                for (clientList *tmp2 = clients->client->subbedTo; tmp2 != NULL; tmp2 = tmp2->next)
+                {
+                    printf("%s \n ", tmp2->client->name);
+                }
+            }
+        }
+    }
+    if (find == 0)
+    {
+        printf("Client %s doesn't exist\n", name);
+        response[0] = 'e';
+        response[1] = 'n';
+        int n = send(client_socket, response, BUFFER_SIZE, 0);
+        check_error(n, "error in handle_list send()\n");
+    }
 }
 
 void handle_publish(char *buffer, int client_socket)

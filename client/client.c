@@ -27,6 +27,11 @@ void handle_subscribe(SOCKET client_socket, char *buffer)
 
 void handle_unsubscribe(SOCKET client_socket, char *buffer)
 {
+    buffer[0] = '3';
+    printf("-Enter the username of the user you want to unsubscribe to: ");
+    fgets(buffer + 1, BUFFER_SIZE, stdin);
+    buffer[strlen(buffer) - 1] = '\0';
+    write_to_server(client_socket, buffer);
 }
 
 void handle_publish(SOCKET client_socket, char *buffer)
@@ -60,6 +65,8 @@ int request_server(SOCKET client_socket, char *buffer)
         else if (c == '3')
         {
             // unsubscribe to user
+            handle_unsubscribe(client_socket, buffer);
+            return 1;
         }
         else if (c == '4')
         {
@@ -88,6 +95,7 @@ int request_server(SOCKET client_socket, char *buffer)
 
 int receive_server(SOCKET client_socket, char *buffer)
 {
+    memset(buffer, '\0', BUFFER_SIZE);
     int resultRecv = recv(client_socket, buffer, BUFFER_SIZE, 0);
     check_error(resultRecv, "error in recv()\n");
 
@@ -115,10 +123,10 @@ int receive_server(SOCKET client_socket, char *buffer)
         printf("\n");
         break;
     case '2':
-        printf("SUBSCRIBE request\n");
+        printf("\nYou have subscribed to %s\n\n", buffer + 1);
         break;
     case '3':
-        printf("UNSUBSCRIBE request\n");
+        printf("\nYou have unsubscribed from %s\n", buffer + 1);
         break;
     case '4':
         printf("PUBLISH request\n");
@@ -149,6 +157,8 @@ void handle_error(char *buffer)
     case 'l':
         printf("\n ERROR : Login error, account doesn't exist\n");
         // Return to authentification
+    case 'u':
+        printf("\n ERROR : You can't unsubscribe to yourself ! \n");
         break;
     case 's3':
         printf("\n ERROR : You can't subscribe to yourself ! \n");
