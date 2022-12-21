@@ -322,6 +322,7 @@ void handle_list(char *buffer, SOCKET client_socket)
 void handle_quit(char *buffer, SOCKET client_socket)
 {
     // Will
+    // Set isConnected to 0
 }
 
 void handle_new_account(char *buffer, SOCKET client_socket)
@@ -359,6 +360,34 @@ void handle_new_account(char *buffer, SOCKET client_socket)
 void handle_login(char *buffer, SOCKET client_socket)
 {
     // Will
+    char *response = malloc(sizeof(char) * BUFFER_SIZE);
+
+    Client *current;
+    // Check if user exists
+    buffer = buffer + 1;
+    char *name = malloc(sizeof(char) * BUFFER_SIZE);
+    name = strcpy(name, buffer);
+    current = get_client_by_name(name);
+
+    if (current == NULL) // If no,
+    {
+        // Send error message
+        printf("Client %s doesn't exist\n", name);
+        response[0] = 'e';
+        response[1] = 'l';
+        int n = send(client_socket, response, BUFFER_SIZE, 0);
+        check_error(n, "error in handle_error send()\n");
+    }
+    else // If yes,
+    {
+        // Set isConnected to 1
+        current->isConnected = 1;
+        // Set client socket
+        current->socket = client_socket;
+        // Send success message
+        printf("Client %s logged in\n", name);
+    }
+    free(name);
 }
 
 Client *get_client_by_socket(SOCKET client_socket)
