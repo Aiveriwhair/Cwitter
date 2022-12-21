@@ -47,6 +47,7 @@ void handle_login(char *buffer, int client_socket);
 /********   AUX REQUEST HANDLERS ********/
 
 Client *get_client_by_socket(SOCKET client_socket);
+Client *get_client_by_name(char *name);
 
 /********   SERVER-CLIENT COMMUNICATION  ********/
 
