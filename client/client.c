@@ -137,8 +137,8 @@ void handle_error(char *buffer){
     case 's':
         printf("\n ERROR : You can't subscribe to yourself ! \n");
         break;
-    case 's1':
-        printf("\n ERROR : You can't subscribe to yourself ! \n");
+    case 'n':
+        printf("\n ERROR : This user doesn't exist ! \n");
         break;
     case 's2':
         printf("\n ERROR : You can't subscribe to yourself ! \n");
