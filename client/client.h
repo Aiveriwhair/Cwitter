@@ -43,9 +43,11 @@ void handle_publish(SOCKET client_socket, char *buffer);
 
 
 
+
 /**********     REQUEST HANDLING    **********/
 int request_server(SOCKET client_socket, char *buffer);
 int receive_server(SOCKET client_socket, char *buffer);
+void handle_error(char *buffer);
 
 /**********     UI    **********/
 void print_welcome();

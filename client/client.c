@@ -17,7 +17,11 @@ void handle_list(SOCKET client_socket, char *buffer){
 }
 
 void handle_subscribe(SOCKET client_socket, char *buffer){
-
+    buffer[0] = '2';
+    printf("-Enter the username of the user you want to subscribe to: ");
+    fgets(buffer+1, BUFFER_SIZE, stdin);
+    buffer[strlen(buffer) - 1] = '\0';
+    write_to_server(client_socket, buffer);
 }
 
 void handle_unsubscribe(SOCKET client_socket, char *buffer){
@@ -48,6 +52,8 @@ int request_server(SOCKET client_socket, char *buffer)
         }
         else if(c == '2'){
             //Subscribe to user
+            handle_subscribe(client_socket, buffer);
+            return 1;
         }
         else if(c == '3'){
             //unsubscribe to user
@@ -57,6 +63,7 @@ int request_server(SOCKET client_socket, char *buffer)
         }
         else if(c == '5'){
             //Quit
+            kill_client(client_socket);
         }
         else{
             printf("Wrong input\n");
@@ -114,11 +121,8 @@ int receive_server(SOCKET client_socket, char *buffer)
     case '5':
         printf("QUIT request\n");
         break;
-    case '6':
-        printf("NEW_ACCOUNT request\n");
-        break;
-    case '7':
-        printf("LOGIN request\n");
+    case 'e':
+        handle_error(buffer);
         break;  
     default:
         printf("Unknown request\n");
@@ -126,6 +130,13 @@ int receive_server(SOCKET client_socket, char *buffer)
     }
     return 1;
 }
+
+void handle_error(char *buffer){
+    if(buffer[1]=='s'){
+        printf("\n ERROR : You can't subscribe to yourself ! \n");
+    }
+}
+
 
 void start_client(char *ip, int port,char* pseudo)
 {
@@ -238,6 +249,8 @@ char* auth()
             while(1){
                 char* pseudo = malloc(20);
                 char* name = malloc(20);
+                memset(pseudo, '\0', 20);
+                memset(name, '\0', 20);
                 pseudo[0] = '6';
                 printf("Enter your pseudo: ");
                 fgets(name, 20, stdin);

@@ -29,7 +29,6 @@ typedef struct Client
 {
     SOCKET socket;
     char name[PSEUDO_SIZE];
-
     bool isConnected;
     clientList *subbedTo;
     messageList *messages;
