@@ -132,9 +132,27 @@ int receive_server(SOCKET client_socket, char *buffer)
 }
 
 void handle_error(char *buffer){
-    if(buffer[1]=='s'){
+    switch (buffer[1])
+    {
+    case 's':
         printf("\n ERROR : You can't subscribe to yourself ! \n");
+        break;
+    case 's1':
+        printf("\n ERROR : You can't subscribe to yourself ! \n");
+        break;
+    case 's2':
+        printf("\n ERROR : You can't subscribe to yourself ! \n");
+        break;
+    case 's3':
+        printf("\n ERROR : You can't subscribe to yourself ! \n");
+        break;
+    case 's4':
+        printf("\n ERROR : You can't subscribe to yourself ! \n");
+        break;
+    default:
+        break;
     }
+    
 }
 
 

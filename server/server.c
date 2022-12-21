@@ -187,10 +187,12 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
 
 void handle_unsubscribe(char *buffer, int client_socket)
 {
+    //jeremy
 }
 
 void handle_publish(char *buffer, int client_socket)
 {
+    //le premier qui fini
 }
 
 void handle_list(char *buffer, SOCKET client_socket)
@@ -218,10 +220,15 @@ void handle_list(char *buffer, SOCKET client_socket)
 
 void handle_quit(char *buffer, SOCKET client_socket)
 {
+    // Will
 }
 
 void handle_new_account(char *buffer, SOCKET client_socket)
 {
+
+    //add check of existant username
+
+
     buffer = buffer + 1;
     printf("buffer : %s\n", buffer);
     char *name = malloc(sizeof(char) * BUFFER_SIZE);
@@ -246,16 +253,11 @@ void handle_new_account(char *buffer, SOCKET client_socket)
         printf("\t%s\n", temp->client->name);
     }
     free(name);
-
-    clientList *temp = clients;
-    for (temp; temp != NULL; temp = temp->next)
-    {
-        printf("clients : %s\n", temp->client->name);
-    }
 }
 
 void handle_login(char *buffer, SOCKET client_socket)
 {
+    // Will
 }
 
 Client *get_client_by_socket(SOCKET client_socket)
