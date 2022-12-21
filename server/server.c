@@ -10,7 +10,7 @@
         }                          \
     } while (0)
 
-clientList *clients;
+static clientList *clients;
 
 int start_server(int port)
 {
@@ -193,20 +193,22 @@ void handle_new_account(char *buffer, SOCKET client_socket)
 
     // Sinon, on ajoute le client dans la liste clients
     Client *newClient = init_client(client_socket, name, NULL, NULL);
+    if (clients == NULL)
+    {
+        printf("clients is null\n");
+        clients = init_clientList(newClient);
+    }
+    else
+    {
+        printf("clients is not null\n");
+        add_client(clients, newClient);
+    }
 
-    // Code pas nécessaire car déjà géré dans nos fonctions client
-    // if (clients == NULL)
-    // {
-    //     printf("clients is null\n");
-    //     clients = init_clientList(newClient);
-    // }
-    // else
-    // {
-    //     printf("clients is not null\n");
-    //     add_client(clients, newClient);
-    // }
-    add_client(clients, newClient);
     printf("New client added in clients \n");
+    if (clients == NULL)
+    {
+        printf("clients est null\n");
+    }
 
     clientList *temp = clients;
     for (temp; temp != NULL; temp = temp->next)
