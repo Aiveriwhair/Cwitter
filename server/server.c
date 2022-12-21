@@ -123,7 +123,6 @@ void handle_request(fd_set readfds, SOCKET server_socket)
         break;
     case '6':
         printf("NEW_ACCOUNT request\n");
-        printf("buffer : %s\n", buffer);
         handle_new_account(buffer, server_socket);
         
         break;
