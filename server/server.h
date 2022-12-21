@@ -69,9 +69,9 @@ pseudo2
 
 /***********    DATABASE   ***********/
 void save_as(FILE *f, char *data);
-clientList *loadDB_from(char *file_path);
 
 void DB_save(char *file_path, clientList *Users);
+clientList *DB_load(char *file_path);
 
 /***********    TESTS   ***********/
 void testDB_save(char *fpath, clientList *Users);

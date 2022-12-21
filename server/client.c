@@ -194,7 +194,7 @@ char *client_to_string(Client *client)
         res = strcat(res, "unamed\n");
     }
 
-    // receivers \n
+    // n subbedTo \n
     if (client->subbedTo != NULL)
     {
         char *subbedtoStr = clientList_to_string(client->subbedTo);
@@ -226,6 +226,7 @@ char *clients_to_string(clientList *clist)
         Client *current = temp->client;
         if (current == NULL)
             break;
+
         char *currentStr = client_to_string(current);
         res = realloc(res, charS * strlen(res) + charS * strlen(currentStr) + charS);
         res = strcat(res, currentStr);
@@ -238,10 +239,12 @@ char *clientList_to_string(clientList *clist)
 {
     char *res = malloc(0);
     clientList *temp = clist;
+    res = (char *)realloc(res, charS * strlen(res) + intlen(clientList_length(clist)) + charS);
+    strcat(strcat(res, intToString(clientList_length(clist))), " ");
     while (temp != NULL)
     {
         Client *current = temp->client;
-        // printf("realloc %d bytes\n", charS * strlen(res) + charS * strlen(current->name) + charS);
+
         res = (char *)realloc(res, charS * strlen(res) + charS * strlen(current->name) + charS);
         if (temp->next == NULL)
         {
