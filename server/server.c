@@ -93,10 +93,10 @@ int init_server(int port)
 
 void handle_request(fd_set readfds, SOCKET server_socket)
 {
-    char *buffer = malloc(BUFFER_SIZE*sizeof(char));
+    char *buffer = malloc(BUFFER_SIZE * sizeof(char));
     memset(buffer, '\0', BUFFER_SIZE);
-    printf("before recv() buffer : %s\n",buffer);
-    int resultRecv = recv(server_socket, buffer, BUFFER_SIZE-1, 0);
+    printf("before recv() buffer : %s\n", buffer);
+    int resultRecv = recv(server_socket, buffer, BUFFER_SIZE - 1, 0);
     check_error(resultRecv, "error in handle_request recv()\n");
     printf("Request type : %c\n", buffer[0]);
     switch (buffer[0])
@@ -124,7 +124,7 @@ void handle_request(fd_set readfds, SOCKET server_socket)
     case '6':
         printf("NEW_ACCOUNT request\n");
         handle_new_account(buffer, server_socket);
-        
+
         break;
     case '7':
         printf("LOGIN request\n");
@@ -136,8 +136,7 @@ void handle_request(fd_set readfds, SOCKET server_socket)
     }
     free(buffer);
     buffer = NULL;
-    printf("after free buffer : %s\n",buffer);
-
+    printf("after free buffer : %s\n", buffer);
 }
 
 void kill_server(SOCKET server_socket)
@@ -148,17 +147,17 @@ void kill_server(SOCKET server_socket)
 void handle_subscribe(char *buffer, SOCKET client_socket)
 {
     char *response = malloc(sizeof(char) * BUFFER_SIZE);
-    //reading name from buffer
+    // reading name from buffer
     char *name = malloc(sizeof(char) * BUFFER_SIZE);
     int i = 1;
-    
+
     while (buffer[i] != '\0')
     {
-        name[i-1] = buffer[i];
+        name[i - 1] = buffer[i];
         i++;
     }
 
-    //checking if this username exists
+    // checking if this username exists
     clientList *tmp = clients;
     for (tmp; tmp != NULL; tmp = tmp->next)
     {
@@ -169,7 +168,7 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
                 printf("Client try to subs to himself\n");
                 response[0] = 'e';
                 response[1] = 's';
-                int n =send(client_socket, response, BUFFER_SIZE, 0);
+                int n = send(client_socket, response, BUFFER_SIZE, 0);
                 check_error(n, "error in handle_list send()\n");
             }
             else
@@ -186,12 +185,12 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
 
 void handle_unsubscribe(char *buffer, int client_socket)
 {
-    //jeremy
+    // jeremy
 }
 
 void handle_publish(char *buffer, int client_socket)
 {
-    //le premier qui fini
+    // le premier qui fini
 }
 
 void handle_list(char *buffer, SOCKET client_socket)
@@ -220,20 +219,20 @@ void handle_list(char *buffer, SOCKET client_socket)
 void handle_quit(char *buffer, SOCKET client_socket)
 {
     // Will
+    // Set isConnected to 0
 }
 
 void handle_new_account(char *buffer, SOCKET client_socket)
 {
 
-    //add check of existant username
-
+    // add check of existant username
 
     buffer = buffer + 1;
     printf("buffer : %s\n", buffer);
     char *name = malloc(sizeof(char) * BUFFER_SIZE);
     name = strcpy(name, buffer);
     printf("name : %s\n", name);
-    Client *newClient = init_client(client_socket,name, NULL,NULL);
+    Client *newClient = init_client(client_socket, name, NULL, NULL);
     newClient->isConnected = 1;
     if (clients == NULL)
     {
@@ -248,7 +247,8 @@ void handle_new_account(char *buffer, SOCKET client_socket)
 
     clientList *temp = clients;
     printf("clients: \n");
-    for (temp; temp != NULL; temp = temp->next){
+    for (temp; temp != NULL; temp = temp->next)
+    {
         printf("\t%s\n", temp->client->name);
     }
     free(name);
@@ -257,6 +257,34 @@ void handle_new_account(char *buffer, SOCKET client_socket)
 void handle_login(char *buffer, SOCKET client_socket)
 {
     // Will
+    char *response = malloc(sizeof(char) * BUFFER_SIZE);
+
+    Client *current;
+    // Check if user exists
+    buffer = buffer + 1;
+    char *name = malloc(sizeof(char) * BUFFER_SIZE);
+    name = strcpy(name, buffer);
+    current = get_client_by_name(clients, name);
+
+    if (current == NULL) // If no,
+    {
+        // Send error message
+        printf("Client %s doesn't exist\n", name);
+        response[0] = 'e';
+        response[1] = 'l';
+        int n = send(client_socket, response, BUFFER_SIZE, 0);
+        check_error(n, "error in handle_error send()\n");
+    }
+    else // If yes,
+    {
+        // Set isConnected to 1
+        current->isConnected = 1;
+        // Set client socket
+        current->socket = client_socket;
+        // Send success message
+        printf("Client %s logged in\n", name);
+    }
+    free(name);
 }
 
 Client *get_client_by_socket(SOCKET client_socket)
