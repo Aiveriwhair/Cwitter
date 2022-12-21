@@ -26,7 +26,7 @@ int start_server(int port)
     {
         printf("Waiting for new select resolution\n");
 
-        for (int i = server_socket; i< maxFD + 1; i++)
+        for (int i = server_socket; i < maxFD + 1; i++)
         {
             FD_SET(i, &readfds);
         }
@@ -55,14 +55,14 @@ int start_server(int port)
         else
         {
             printf("New request\n");
-            for (int i=0; i<maxFD + 1; i++)
+            for (int i = 0; i < maxFD + 1; i++)
             {
                 if (FD_ISSET(i, &readfds))
                 {
                     printf("Request from socket %d\n", i);
                     handle_request(readfds, i);
                 }
-            }           
+            }
         }
     }
     kill_server(server_socket);
@@ -94,7 +94,7 @@ int init_server(int port)
 void handle_request(fd_set readfds, SOCKET server_socket)
 {
     char buffer[BUFFER_SIZE];
-    int resultRecv = recv(server_socket, buffer, BUFFER_SIZE-1, 0);
+    int resultRecv = recv(server_socket, buffer, BUFFER_SIZE - 1, 0);
     check_error(resultRecv, "error in handle_request recv()\n");
     printf("Request type : %c\n", buffer[0]);
     switch (buffer[0])
@@ -126,37 +126,30 @@ void handle_request(fd_set readfds, SOCKET server_socket)
     case '7':
         printf("LOGIN request\n");
         handle_login(buffer, server_socket);
-        break;  
+        break;
     default:
         printf("Unknown request\n");
         break;
     }
 }
 
-
 void kill_server(SOCKET server_socket)
 {
     close(server_socket);
 }
-
 
 void handle_subscribe(char *buffer, SOCKET client_socket)
 {
     int n = recv(client_socket, buffer, BUFFER_SIZE, 0);
 }
 
-
 void handle_unsubscribe(char *buffer, int client_socket)
 {
-
 }
-
 
 void handle_publish(char *buffer, int client_socket)
 {
-
 }
-
 
 void handle_list(char *buffer, SOCKET client_socket)
 {
@@ -170,67 +163,72 @@ void handle_list(char *buffer, SOCKET client_socket)
     clientList *tmp = clients;
     response[0] = '1';
     response[1] = '-';
-    for (tmp ; tmp != NULL; tmp = tmp->next)
+    for (tmp; tmp != NULL; tmp = tmp->next)
     {
         response = strcat(response, tmp->client->name);
-        response = strcat(response,"-");
+        response = strcat(response, "-");
     }
     printf("buffer in list : %s\n", response);
-    int n =send(client_socket, response, BUFFER_SIZE, 0);
+    int n = send(client_socket, response, BUFFER_SIZE, 0);
     check_error(n, "error in handle_list send()\n");
 }
 
-
 void handle_quit(char *buffer, SOCKET client_socket)
 {
-
 }
-
 
 void handle_new_account(char *buffer, SOCKET client_socket)
 {
+    // Création d'un nouveau compte
     printf("New account request\n");
+
+    // Récupération du pseudo client
     buffer = buffer + 1;
     char *name = malloc(sizeof(char) * BUFFER_SIZE);
     name = strncpy(name, buffer, BUFFER_SIZE);
     printf("name : %s\n", name);
-    Client *newClient = init_client(client_socket,name, NULL,NULL);
-    if (clients == NULL)
-    {
-        printf("clients is null\n");
-        clients = init_clientList(newClient);
-    }
-    else
-    {
-        printf("clients is not null\n");
-        add_client(clients, newClient);
-    }
+
+    // Checker si le pseudo existe deja dans clients
+    // Si oui, c'est le cas on envoie un message d'erreur
+
+    // Sinon, on ajoute le client dans la liste clients
+    Client *newClient = init_client(client_socket, name, NULL, NULL);
+
+    // Code pas nécessaire car déjà géré dans nos fonctions client
+    // if (clients == NULL)
+    // {
+    //     printf("clients is null\n");
+    //     clients = init_clientList(newClient);
+    // }
+    // else
+    // {
+    //     printf("clients is not null\n");
+    //     add_client(clients, newClient);
+    // }
+    add_client(clients, newClient);
     printf("New client added in clients \n");
 
     clientList *temp = clients;
-    for (temp; temp != NULL; temp = temp->next){
+    for (temp; temp != NULL; temp = temp->next)
+    {
         printf("clients : %s\n", temp->client->name);
     }
-
 }
-
 
 void handle_login(char *buffer, SOCKET client_socket)
 {
-
 }
 
-
-Client* get_client_by_socket(SOCKET client_socket)
+Client *get_client_by_socket(SOCKET client_socket)
 {
-    clientList* clientsList= clients;
-    while(clientsList!=NULL)
+    clientList *clientsList = clients;
+    while (clientsList != NULL)
     {
-        if(clientsList->client->socket==client_socket)
+        if (clientsList->client->socket == client_socket)
         {
             return clientsList->client;
         }
-        clientsList=clientsList->next;
+        clientsList = clientsList->next;
     }
     return NULL;
 }
@@ -312,7 +310,7 @@ void testDB_save(char *fpath, clientList *Users)
 
 clientList *testDB_load(char *fpath)
 {
-    //return load_from(fpath);
+    // return load_from(fpath);
 }
 
 clientList *clientList_tostring_test(bool prints)
@@ -384,7 +382,7 @@ int main(int argc, char **argv)
     }
     start_server(atoi(argv[1]));
 
-    //DB_save("db.txt", clients_tostring_test(false));
-    // testDB_save("dbloaded.txt", Users);
+    // DB_save("db.txt", clients_tostring_test(false));
+    //  testDB_save("dbloaded.txt", Users);
     return EXIT_SUCCESS;
 }
