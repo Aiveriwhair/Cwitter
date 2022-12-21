@@ -1,5 +1,10 @@
 # Dictionnaire des erreurs
 
-# Côté client
+# Recu côté client
 
-# Côté serveur
+[e:...] -> Erreur
+[e:l] -> Login impossible, pseudo inexistant
+[e:s] -> Subscribe impossible, pseudo inexistant
+[e:u] -> Unsubscribe impossible, pseudo inexistant
+
+# Recu côté serveur
