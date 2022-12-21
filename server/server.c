@@ -151,7 +151,7 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
     int i = 1;
 
     int find = 0;
-    
+
     while (buffer[i] != '\0')
     {
         name[i - 1] = buffer[i];
@@ -160,7 +160,7 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
 
     // checking if this username exists
     clientList *tmp = clients;
-    
+
     for (tmp; tmp != NULL; tmp = tmp->next)
     {
         if (strcmp(tmp->client->name, name) == 0)
@@ -176,25 +176,25 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
             }
             else
             {
-                //adding client to the list of subscribers
-                Client *toSub=get_client_by_name(name);
+                // adding client to the list of subscribers
+                Client *toSub = get_client_by_name(name);
                 if (tmp->client->subbedTo == NULL)
                 {
                     printf("subbedTo is null\n");
                     tmp->client->subbedTo = init_clientList(toSub);
                     response[0] = '2';
-                    //adding name to sub in response
+                    // adding name to sub in response
                     char *response_name = tmp->client->name;
-                    response=strcat(response, response_name);
+                    response = strcat(response, response_name);
                 }
                 else
                 {
                     printf("subbedTo is not null\n");
                     add_client(tmp->client->subbedTo, toSub);
                     response[0] = '2';
-                    //adding name to sub in response
+                    // adding name to sub in response
                     char *response_name = tmp->client->name;
-                    response=strcat(response, response_name);
+                    response = strcat(response, response_name);
                 }
 
                 printf("Printing subbedTo list\n");
@@ -204,14 +204,14 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
                 }
             }
         }
-        
     }
 
-    if (find == 0){
+    if (find == 0)
+    {
         printf("Client %s doesn't exist\n", name);
         response[0] = 'e';
         response[1] = 'n';
-        int n =send(client_socket, response, BUFFER_SIZE, 0);
+        int n = send(client_socket, response, BUFFER_SIZE, 0);
     }
 }
 
@@ -296,7 +296,7 @@ void handle_login(char *buffer, SOCKET client_socket)
     buffer = buffer + 1;
     char *name = malloc(sizeof(char) * BUFFER_SIZE);
     name = strcpy(name, buffer);
-    current = get_client_by_name(clients, name);
+    current = get_client_by_name(name);
 
     if (current == NULL) // If no,
     {
@@ -333,7 +333,8 @@ Client *get_client_by_socket(SOCKET client_socket)
     return NULL;
 }
 
-Client *get_client_by_name(char *name){
+Client *get_client_by_name(char *name)
+{
     clientList *clientsList = clients;
     while (clientsList != NULL)
     {

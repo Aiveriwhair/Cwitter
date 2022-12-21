@@ -3,72 +3,77 @@
 #define check_error(expr, userMsg) \
     do                             \
     {                              \
-        if (expr < 0)            \
+        if (expr < 0)              \
         {                          \
             perror(userMsg);       \
             exit(errno);           \
         }                          \
     } while (0)
 
-
-void handle_list(SOCKET client_socket, char *buffer){
-    buffer[0] = '1';    
+void handle_list(SOCKET client_socket, char *buffer)
+{
+    buffer[0] = '1';
     write_to_server(client_socket, buffer);
 }
 
-void handle_subscribe(SOCKET client_socket, char *buffer){
+void handle_subscribe(SOCKET client_socket, char *buffer)
+{
     buffer[0] = '2';
     printf("-Enter the username of the user you want to subscribe to: ");
-    fgets(buffer+1, BUFFER_SIZE, stdin);
+    fgets(buffer + 1, BUFFER_SIZE, stdin);
     buffer[strlen(buffer) - 1] = '\0';
     write_to_server(client_socket, buffer);
 }
 
-void handle_unsubscribe(SOCKET client_socket, char *buffer){
-
+void handle_unsubscribe(SOCKET client_socket, char *buffer)
+{
 }
 
-void handle_publish(SOCKET client_socket, char *buffer){
-
+void handle_publish(SOCKET client_socket, char *buffer)
+{
 }
 
 int request_server(SOCKET client_socket, char *buffer)
 {
 
-    
-    int c;   
+    int c;
     static struct termios oldt, newt;
 
-    
-    tcgetattr( STDIN_FILENO, &oldt);
+    tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
-    newt.c_lflag &= ~(ICANON);          
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
-    while((c=getchar())!= EOF){
-        if(c == '1'){
-            //List connecteds users
+    newt.c_lflag &= ~(ICANON);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    while ((c = getchar()) != EOF)
+    {
+        if (c == '1')
+        {
+            // List connecteds users
             handle_list(client_socket, buffer);
             return 1;
         }
-        else if(c == '2'){
-            //Subscribe to user
+        else if (c == '2')
+        {
+            // Subscribe to user
             handle_subscribe(client_socket, buffer);
             return 1;
         }
-        else if(c == '3'){
-            //unsubscribe to user
+        else if (c == '3')
+        {
+            // unsubscribe to user
         }
-        else if(c == '4'){
-            //Publish message
+        else if (c == '4')
+        {
+            // Publish message
         }
-        else if(c == '5'){
-            //Quit
+        else if (c == '5')
+        {
+            // Quit
             kill_client(client_socket);
         }
-        else{
+        else
+        {
             printf("Wrong input\n");
         }
-
     }
 
     // fgets(buffer, BUFFER_SIZE, stdin);
@@ -80,9 +85,6 @@ int request_server(SOCKET client_socket, char *buffer)
     // return resultSend;
     return 0;
 }
-
-
-
 
 int receive_server(SOCKET client_socket, char *buffer)
 {
@@ -99,11 +101,14 @@ int receive_server(SOCKET client_socket, char *buffer)
     {
     case '1':
         printf("-This is the list of users of Cwitter:\n");
-        for(int i = 1; i < strlen(buffer); i++){
-            if(buffer[i] == '-'){
+        for (int i = 1; i < strlen(buffer); i++)
+        {
+            if (buffer[i] == '-')
+            {
                 printf("\n");
             }
-            else{
+            else
+            {
                 printf("%c", buffer[i]);
             }
         }
@@ -123,7 +128,7 @@ int receive_server(SOCKET client_socket, char *buffer)
         break;
     case 'e':
         handle_error(buffer);
-        break;  
+        break;
     default:
         printf("Unknown request\n");
         break;
@@ -131,7 +136,8 @@ int receive_server(SOCKET client_socket, char *buffer)
     return 1;
 }
 
-void handle_error(char *buffer){
+void handle_error(char *buffer)
+{
     switch (buffer[1])
     {
     case 's':
@@ -140,8 +146,9 @@ void handle_error(char *buffer){
     case 'n':
         printf("\n ERROR : This user doesn't exist ! \n");
         break;
-    case 's2':
-        printf("\n ERROR : You can't subscribe to yourself ! \n");
+    case 'l':
+        printf("\n ERROR : Login error, account doesn't exist\n");
+        // Return to authentification
         break;
     case 's3':
         printf("\n ERROR : You can't subscribe to yourself ! \n");
@@ -152,18 +159,16 @@ void handle_error(char *buffer){
     default:
         break;
     }
-    
 }
 
-
-void start_client(char *ip, int port,char* pseudo)
+void start_client(char *ip, int port, char *pseudo)
 {
     SOCKET socket_client = init_client(ip, port);
     char buffer[BUFFER_SIZE];
 
     fd_set readfds;
     int maxFD = socket_client;
- 
+
     write_to_server(socket_client, pseudo);
     printf("Authentification successful \n");
     print_menu();
@@ -174,7 +179,7 @@ void start_client(char *ip, int port,char* pseudo)
 
         if (print)
         {
-            //print_menu();
+            // print_menu();
         }
 
         FD_SET(socket_client, &readfds);
@@ -183,7 +188,7 @@ void start_client(char *ip, int port,char* pseudo)
         int resultSelect = select(maxFD + 1, &readfds, NULL, NULL, NULL);
         check_error(resultSelect, "error in select()\n");
 
-        print=1;
+        print = 1;
 
         if (FD_ISSET(STDIN_FILENO, &readfds))
         {
@@ -226,75 +231,83 @@ int init_client(char *ip, int port)
     return socketClient;
 }
 
-
-char* auth()
+char *auth()
 {
     printf("1. Login\n");
     printf("2. Create account\n");
     printf("3. Quit\n\n");
-    
-    int c;   
+
+    int c;
     static struct termios oldt, newt;
 
-    
-    tcgetattr( STDIN_FILENO, &oldt);
+    tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
-    newt.c_lflag &= ~(ICANON);          
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
-    while((c=getchar())!= EOF){
-        if(c == '1'){
+    newt.c_lflag &= ~(ICANON);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    while ((c = getchar()) != EOF)
+    {
+        if (c == '1')
+        {
             printf("\nLogin\n");
-            while(1){
-                char* pseudo = malloc(20);
-                char* name = malloc(20);
+            while (1)
+            {
+                char *pseudo = malloc(20);
+                char *name = malloc(20);
                 pseudo[0] = '7';
                 printf("Enter your pseudo: ");
                 fgets(name, 20, stdin);
-                if (strlen(name) >6){
+                if (strlen(name) > 6)
+                {
                     printf("Pseudo too long\n");
                     free(name);
                     continue;
                 }
-                else {
+                else
+                {
                     pseudo = strcat(pseudo, name);
                     printf("Pseudo: %s\n", name);
                     return pseudo;
                 }
-            }       
+            }
         }
-        else if(c == '2'){
+        else if (c == '2')
+        {
             printf("\nCreate account\n");
-            while(1){
-                char* pseudo = malloc(20);
-                char* name = malloc(20);
+            while (1)
+            {
+                char *pseudo = malloc(20);
+                char *name = malloc(20);
                 memset(pseudo, '\0', 20);
                 memset(name, '\0', 20);
                 pseudo[0] = '6';
                 printf("Enter your pseudo: ");
                 fgets(name, 20, stdin);
-                if (strlen(name) >6){
+                if (strlen(name) > 6)
+                {
                     printf("Pseudo too long\n");
                     free(name);
                     free(pseudo);
                     continue;
                 }
-                else {
+                else
+                {
                     pseudo = strcat(pseudo, name);
                     printf("Pseudo: %s\n", pseudo);
                     return pseudo;
                 }
             }
         }
-        else if(c == '3'){
+        else if (c == '3')
+        {
             printf("\nQuit\n");
             exit(0);
         }
-        else{
+        else
+        {
             printf("\nWrong input\n");
         }
-
-    }     
-return "ERROR WHILE AUTH";
+    }
+    return "ERROR WHILE AUTH";
 }
 
 void write_to_server(SOCKET client_socket, char *buffer)
@@ -303,7 +316,8 @@ void write_to_server(SOCKET client_socket, char *buffer)
     check_error(resultSend, "error in write to server send()\n");
 }
 
-void print_menu(){
+void print_menu()
+{
     printf("\n You can now use and navigate in Cwitter ! \n");
     printf("\n------------------------- Menu -------------------------\n\n");
     printf("1 ------ list all users of Cwitter, connected or not\n");
@@ -321,9 +335,9 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
     printf("\n\n\n----------- Welcome on Cwitter -----------\n\n\n");
-    char* pseudo = auth();
-    pseudo[strlen(pseudo)-1] = '\0';
-    start_client(argv[1], atoi(argv[2]),pseudo);
+    char *pseudo = auth();
+    pseudo[strlen(pseudo) - 1] = '\0';
+    start_client(argv[1], atoi(argv[2]), pseudo);
 
     return EXIT_SUCCESS;
 }
