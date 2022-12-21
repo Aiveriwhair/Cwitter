@@ -12,8 +12,6 @@
 
 
 void handle_list(SOCKET client_socket, char *buffer){
-    printf("\nList connected users\n");
-    //on met 1 en entete du buffer
     buffer[0] = '1';    
     write_to_server(client_socket, buffer);
 }
@@ -83,7 +81,6 @@ int receive_server(SOCKET client_socket, char *buffer)
 {
     int resultRecv = recv(client_socket, buffer, BUFFER_SIZE, 0);
     check_error(resultRecv, "error in recv()\n");
-    printf("Buffer : %s\n", buffer);
 
     if (resultRecv == 0)
     {
@@ -91,7 +88,42 @@ int receive_server(SOCKET client_socket, char *buffer)
         return 0;
     }
 
-    printf("Server response: %s\n", buffer);
+    switch (buffer[0])
+    {
+    case '1':
+        printf("-This is the list of users of Cwitter:\n");
+        for(int i = 1; i < strlen(buffer); i++){
+            if(buffer[i] == '-'){
+                printf("\n");
+            }
+            else{
+                printf("%c", buffer[i]);
+            }
+        }
+        printf("\n");
+        break;
+    case '2':
+        printf("SUBSCRIBE request\n");
+        break;
+    case '3':
+        printf("UNSUBSCRIBE request\n");
+        break;
+    case '4':
+        printf("PUBLISH request\n");
+        break;
+    case '5':
+        printf("QUIT request\n");
+        break;
+    case '6':
+        printf("NEW_ACCOUNT request\n");
+        break;
+    case '7':
+        printf("LOGIN request\n");
+        break;  
+    default:
+        printf("Unknown request\n");
+        break;
+    }
     return 1;
 }
 
@@ -212,12 +244,12 @@ char* auth()
                 if (strlen(name) >6){
                     printf("Pseudo too long\n");
                     free(name);
+                    free(pseudo);
                     continue;
                 }
                 else {
                     pseudo = strcat(pseudo, name);
                     printf("Pseudo: %s\n", pseudo);
-                    char* buffer = malloc(30);
                     return pseudo;
                 }
             }
@@ -259,6 +291,7 @@ int main(int argc, char **argv)
     }
     printf("\n\n\n----------- Welcome on Cwitter -----------\n\n\n");
     char* pseudo = auth();
+    pseudo[strlen(pseudo)-1] = '\0';
     start_client(argv[1], atoi(argv[2]),pseudo);
 
     return EXIT_SUCCESS;

@@ -165,17 +165,16 @@ void handle_list(char *buffer, SOCKET client_socket)
         printf("No clients connected\n");
         return;
     }
-    printf("clients : %s\n", clients->client->name);
-    
+
     char *response = malloc(sizeof(char) * BUFFER_SIZE);
     clientList *tmp = clients;
+    response[0] = '1';
+    response[1] = '-';
     for (tmp ; tmp != NULL; tmp = tmp->next)
     {
-        printf("client name : %s\n", tmp->client->name);
         response = strcat(response, tmp->client->name);
+        response = strcat(response,"-");
     }
-    response = strcat(response, "\n");
-
     printf("buffer in list : %s\n", response);
     int n =send(client_socket, response, BUFFER_SIZE, 0);
     check_error(n, "error in handle_list send()\n");
@@ -192,8 +191,8 @@ void handle_new_account(char *buffer, SOCKET client_socket)
 {
     printf("New account request\n");
     buffer = buffer + 1;
-    char *name = malloc(sizeof(char) * 6);
-    name = strncpy(name, buffer, 5);
+    char *name = malloc(sizeof(char) * BUFFER_SIZE);
+    name = strncpy(name, buffer, BUFFER_SIZE);
     printf("name : %s\n", name);
     Client *newClient = init_client(client_socket,name, NULL,NULL);
     if (clients == NULL)
