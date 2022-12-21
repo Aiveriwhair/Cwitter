@@ -156,23 +156,17 @@ void add_client(clientList *cList, Client *client)
     temp->next = init_clientList(client);
 }
 
-void remove_client(clientList *cList, Client *client)
+void remove_client(clientList *cList, Client *clientToUnsub)
 {
     clientList *temp = cList;
-    if (temp->client == client)
+
+    while (temp != NULL)
     {
-        clientList *next = temp->next;
-        delete_clientList(temp);
-        cList = next;
-        return;
-    }
-    while (temp->next != NULL)
-    {
-        if (temp->next->client == client)
+        if (temp->client == clientToUnsub)
         {
-            clientList *next = temp->next->next;
-            delete_clientList(temp->next);
-            temp->next = next;
+            clientList *next = temp->next;
+            free(temp);
+            cList = next;
             return;
         }
         temp = temp->next;
