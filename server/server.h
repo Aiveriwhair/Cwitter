@@ -12,7 +12,7 @@
 
 #define PORT 5000
 #define MAX_CLIENTS 10
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 64
 #define PUBLICATION_SIZE 20
 typedef int SOCKET;
 
@@ -45,8 +45,8 @@ void handle_login(char *buffer, int client_socket);
 
 /********   AUX REQUEST HANDLERS ********/
 
-Client *get_client_by_socket(SOCKET client_socket);
-Client *get_client_by_name(clientList *clist, char *name);
+Client *get_client_by_socket(clientList *cList, SOCKET client_socket);
+Client *get_client_by_name(clientList *cList, char *name);
 
 /********   SERVER-CLIENT COMMUNICATION  ********/
 

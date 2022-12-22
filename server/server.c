@@ -145,7 +145,7 @@ void kill_server(SOCKET server_socket)
 void handle_subscribe(char *buffer, SOCKET client_socket)
 {
     // Get current client
-    Client *currentClient = get_client_by_socket(client_socket);
+    Client *currentClient = get_client_by_socket(clients, client_socket);
     if (currentClient == NULL)
     {
         printf("SERVER ERROR\n");
@@ -231,7 +231,7 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
 void handle_unsubscribe(char *buffer, SOCKET client_socket)
 {
     // Get current client
-    Client *currentClient = get_client_by_socket(client_socket);
+    Client *currentClient = get_client_by_socket(clients, client_socket);
     if (currentClient == NULL)
     {
         printf("SERVER ERROR\n");
@@ -311,7 +311,53 @@ void handle_unsubscribe(char *buffer, SOCKET client_socket)
 
 void handle_publish(char *buffer, int client_socket)
 {
-    // le premier qui fini
+    // Get current client
+    Client *currentClient = get_client_by_socket(clients, client_socket);
+    // Get the pointer on the right adress for the message we are going to create
+    messageList *currentMsgs = currentClient->messages;
+    while (currentMsgs != NULL)
+    {
+        if (currentMsgs->content == NULL)
+        {
+            currentMsgs->receivers = NULL;
+            break;
+        }
+        currentMsgs = currentMsgs->next;
+    }
+
+    // Create response buffer
+    char *response = malloc(BUFFER_SIZE);
+    memset(response, '\0', BUFFER_SIZE);
+
+    // Create message buffer & put message in it
+    char *message = malloc(BUFFER_SIZE);
+    memset(message, '\0', BUFFER_SIZE);
+    message = strcpy(message, buffer + 1);
+
+    // Add message to current client messages list
+    currentMsgs->content = message;
+
+    // Get clients that are subbed to current client
+    printf("Not implemented yet\n");
+    clientList *subbedTo = NULL;
+    // Run through list and send message to each client if he is connected
+    while (subbedTo != NULL)
+    {
+        if (subbedTo->client->isConnected == 1) // If connected, send message
+        {
+            response[0] = '4';
+            strcat(response + 1, currentClient->name);
+            strcat(response + 1, "-");
+            strcat(response + 1, message);
+            int n = send(subbedTo->client->socket, response, BUFFER_SIZE, 0);
+            check_error(n, "error in handle_publish send()\n");
+        }
+        else // If not connected, add to offline messages list
+        {
+            // Add to offline messages list
+        }
+        subbedTo = subbedTo->next;
+    }
 }
 
 void handle_list(char *buffer, SOCKET client_socket)
@@ -378,7 +424,7 @@ void handle_new_account(char *buffer, SOCKET client_socket)
 void handle_login(char *buffer, SOCKET client_socket)
 {
     // Will
-    char *response = malloc(sizeof(char) * BUFFER_SIZE);
+    char *response = malloc(BUFFER_SIZE);
 
     Client *current;
     // Check if user exists
@@ -408,9 +454,9 @@ void handle_login(char *buffer, SOCKET client_socket)
     free(name);
 }
 
-Client *get_client_by_socket(SOCKET client_socket)
+Client *get_client_by_socket(clientList *cList, SOCKET client_socket)
 {
-    clientList *clientsList = clients;
+    clientList *clientsList = cList;
     while (clientsList != NULL)
     {
         if (clientsList->client->socket == client_socket)
@@ -435,20 +481,6 @@ Client *get_client_by_name(clientList *cList, char *name)
     }
     return NULL;
 }
-
-// Client *get_client_by_name(char *name)
-// {
-//     clientList *clientsList = clients;
-//     while (clientsList != NULL)
-//     {
-//         if (strcmp(clientsList->client->name, name) == 0)
-//         {
-//             return clientsList->client;
-//         }
-//         clientsList = clientsList->next;
-//     }
-//     return NULL;
-// }
 
 void save_as(FILE *file, char *data)
 {
