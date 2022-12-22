@@ -165,12 +165,13 @@ void remove_client(clientList *cList, Client *clientToUnsub)
     bool found = false;
     while (temp != NULL && !found)
     {
-        if (temp->client == clientToUnsub)
+        if (temp->next->client == clientToUnsub)
         {
             printf("found client to unsub\n");
             cList = temp->next;
-            free(temp);
+            cList = NULL;
             found = true;
+            break;
         }
         temp = temp->next;
     }
