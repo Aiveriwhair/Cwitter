@@ -277,47 +277,28 @@ void handle_unsubscribe(char *buffer, SOCKET client_socket)
         return;
     }
 
-    if (currentClient->subbedTo == NULL)
+    // Check if the client is in subbedTo list
+    Client *cli = get_client_by_name(currentClient->subbedTo, name);
+    // If no, send error response
+    if (cli == NULL)
     {
-        printf("Client %s has no subbedTo list\n", currentClient->name);
         // Send error response
+        printf("Client %s is not in subbedTo list\n", name);
         response[0] = 'e';
-        response[1] = 'r';
+        response[1] = 'u';
         int n = send(client_socket, response, BUFFER_SIZE, 0);
         check_error(n, "error in handle_unsubs send()\n");
         free(name);
         free(response);
         return;
     }
-    clientList *tmp = currentClient->subbedTo;
-    for (tmp; tmp != NULL; tmp = tmp->next)
-    {
-        if (tmp->client == sub)
-        {
-            printf("Client %s is in subbedTo list\n", sub->name);
-            break;
-        }
-        if (tmp->next == NULL)
-        {
-            printf("Client %s is not in subbedTo list\n", sub->name);
-            // Send error response
-            response[0] = 'e';
-            response[1] = 'u';
-            int n = send(client_socket, response, BUFFER_SIZE, 0);
-            check_error(n, "error in handle_unsubs send()\n");
-            free(name);
-            free(response);
-            return;
-        }
-    }
 
+    // If yes, remove from subbedTo list
     // Remove from subbedTo list
-    remove_client(currentClient->subbedTo, sub);
-    printf("Printing clients list : ");
-    printf("%s \n", clientList_to_string(clients));
-    printf("Printing clients subbed to list : ");
-    printf("%s\n", clientList_to_string(currentClient->subbedTo));
-    printf("Done printing lists after removal\n ");
+    remove_client(currentClient->subbedTo, cli);
+
+    printf("Printing subbedTo list : ");
+    printf("%s \n", clientList_to_string(currentClient->subbedTo));
 
     response[0] = '3';
     strcat(response + 1, name);

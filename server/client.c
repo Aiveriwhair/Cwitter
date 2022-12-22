@@ -245,7 +245,11 @@ char *clientList_to_string(clientList *clist)
     while (temp != NULL)
     {
         Client *current = temp->client;
-
+        if (current == NULL)
+        {
+            temp = temp->next;
+            continue;
+        }
         // printf("realloc %d bytes\n", charS * strlen(res) + charS * strlen(current->name) + charS);
         res = (char *)realloc(res, charS * strlen(res) + charS * strlen(current->name) + charS);
         if (temp->next == NULL)
