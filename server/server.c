@@ -297,7 +297,7 @@ void handle_unsubscribe(char *buffer, SOCKET client_socket)
     remove_client(currentClient->subbedTo, cli);
 
     printf("Printing subbedTo list : ");
-    printf("%s \n", clientList_to_string(currentClient->subbedTo));
+    // printf("%s \n", clientList_to_string(currentClient->subbedTo));
 
     response[0] = '3';
     strcat(response + 1, name);
