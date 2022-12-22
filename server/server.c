@@ -332,8 +332,6 @@ void handle_list(char *buffer, SOCKET client_socket)
     response[1] = '-';
     for (tmp; tmp != NULL; tmp = tmp->next)
     {
-        response = strcat(response, intToString(tmp->client->socket));
-        response = strcat(response, ":");
         response = strcat(response, tmp->client->name);
         response = strcat(response, "-");
     }

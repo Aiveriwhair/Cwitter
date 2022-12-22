@@ -350,7 +350,6 @@ int main(int argc, char **argv)
     }
     printf("\n\n\n----------- Welcome on Cwitter -----------\n\n\n");
     char *pseudo = malloc(20);
-    printf("Hey\n");
     if (argc == 3)
     {
         pseudo = auth();
@@ -360,7 +359,6 @@ int main(int argc, char **argv)
     {
         pseudo = argv[3];
         pseudo[0] = '6';
-        printf("Hello %s\n", pseudo);
     }
     start_client(argv[1], atoi(argv[2]), pseudo);
 
