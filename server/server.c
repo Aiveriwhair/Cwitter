@@ -168,6 +168,12 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
     {
         printf("Client already subscribed to %s\n", name);
         // Send error response
+        response[0] = 'e';
+        response[1] = 'd';
+        int n = send(client_socket, response, BUFFER_SIZE, 0);
+        check_error(n, "error in handle_subs send()\n");
+        free(name);
+        free(response);
         return;
     }
     // If no, continue
@@ -181,6 +187,8 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
         response[1] = 's';
         int n = send(client_socket, response, BUFFER_SIZE, 0);
         check_error(n, "error in handle_subs send()\n");
+        free(name);
+        free(response);
         return;
     }
 
@@ -190,11 +198,23 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
     {
         printf("Client %s doesn't exist", name);
         // Send error response
+        response[0] = 'e';
+        response[1] = 'n';
+        int n = send(client_socket, response, BUFFER_SIZE, 0);
+        check_error(n, "error in handle_subs send()\n");
+        free(name);
+        free(response);
         return;
     }
     // If yes, add to subbedTo list
-    add_client(currentClient->subbedTo, sub);
-
+    if (currentClient->subbedTo == NULL)
+    {
+        currentClient->subbedTo = init_clientList(sub);
+    }
+    else
+    {
+        add_client(currentClient->subbedTo, sub);
+    }
     printf("Printing subbedTo list :\n");
     printf("%s\n", clientList_to_string(currentClient->subbedTo));
 
@@ -210,72 +230,102 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
 
 void handle_unsubscribe(char *buffer, SOCKET client_socket)
 {
-    char *response = malloc(sizeof(char) * BUFFER_SIZE);
-
-    // reading name from buffer
-    char *name = malloc(sizeof(char) * BUFFER_SIZE);
-    int i = 1;
-
-    int find = 0;
-
-    while (buffer[i] != '\0')
+    // Get current client
+    Client *currentClient = get_client_by_socket(client_socket);
+    if (currentClient == NULL)
     {
-        name[i - 1] = buffer[i];
-        i++;
+        printf("SERVER ERROR\n");
+        return;
     }
 
-    // checking if this username exists
-    clientList *tmp = clients;
+    // Create response buffer
+    char *response = malloc(BUFFER_SIZE);
+    memset(response, '\0', BUFFER_SIZE);
 
-    for (tmp; tmp != NULL; tmp = tmp->next)
+    // Create sub name buffer & put name in it
+    char *name = malloc(BUFFER_SIZE);
+    memset(name, '\0', BUFFER_SIZE);
+    name = strcpy(name, buffer + 1);
+
+    clientList *temp = clients;
+
+    Client *sub = get_client_by_name(temp, name);
+    // If no send error response
+    if (sub == NULL)
     {
-        if (strcmp(tmp->client->name, name) == 0)
-        {
-            find = 1;
-            if (tmp->client->socket == client_socket)
-            {
-                printf("Client try to unsub to himself\n");
-                response[0] = 'e';
-                response[1] = 'u';
-                int n = send(client_socket, response, BUFFER_SIZE, 0);
-                check_error(n, "error in handle_unsubs send()\n");
-            }
-            else
-            {
-                Client *toUnSub = get_client_by_name(clients, name);
-                if (tmp->client->subbedTo == NULL)
-                {
-                    printf("subbedTo is null\n");
-                }
-                else
-                {
-                    printf("subbedTo is not null\n");
-                    printf("Removing client from subbedTo list\n");
-                    remove_client(tmp->client->subbedTo, toUnSub);
-                    response[0] = '3';
-                    char *response_name = tmp->client->name;
-                    response = strcat(response, response_name);
-                    int n = send(client_socket, response, BUFFER_SIZE, 0);
-                    check_error(n, "error in handle_unsubs send()\n");
-                }
-
-                printf("Printing subbedTo list\n");
-
-                for (clientList *tmp2 = clients->client->subbedTo; tmp2 != NULL; tmp2 = tmp2->next)
-                {
-                    printf("%s \n ", tmp2->client->name);
-                }
-            }
-        }
-    }
-    if (find == 0)
-    {
-        printf("Client %s doesn't exist\n", name);
+        printf("The client %s doesn't exist\n", name);
+        // Send error response
         response[0] = 'e';
         response[1] = 'n';
         int n = send(client_socket, response, BUFFER_SIZE, 0);
-        check_error(n, "error in handle_list send()\n");
+        check_error(n, "error in handle_unsubs send()\n");
+        free(name);
+        free(response);
+        return;
     }
+    // If yes, continue
+    sub = get_client_by_name(clients, name);
+    // check if trying to unsub from self
+    if (sub == currentClient)
+    {
+        printf("Client tried to self unsubscribe\n");
+        response[0] = 'e';
+        response[1] = 't';
+        int n = send(client_socket, response, BUFFER_SIZE, 0);
+        check_error(n, "error in handle_unsubs send()\n");
+        free(name);
+        free(response);
+        return;
+    }
+
+    if (currentClient->subbedTo == NULL)
+    {
+        printf("Client %s has no subbedTo list\n", currentClient->name);
+        // Send error response
+        response[0] = 'e';
+        response[1] = 'r';
+        int n = send(client_socket, response, BUFFER_SIZE, 0);
+        check_error(n, "error in handle_unsubs send()\n");
+        free(name);
+        free(response);
+        return;
+    }
+
+    for (clientList *tmp = currentClient->subbedTo; tmp != NULL; tmp = tmp->next)
+    {
+        if (tmp->client == sub)
+        {
+            printf("Client %s is in subbedTo list\n", sub->name);
+            break;
+        }
+        if (tmp->next == NULL)
+        {
+            printf("Client %s is not in subbedTo list\n", sub->name);
+            // Send error response
+            response[0] = 'e';
+            response[1] = 'u';
+            int n = send(client_socket, response, BUFFER_SIZE, 0);
+            check_error(n, "error in handle_unsubs send()\n");
+            free(name);
+            free(response);
+            return;
+        }
+    }
+
+    // Remove from subbedTo list
+    clientList *temp2 = currentClient->subbedTo;
+    remove_client(temp2, sub);
+    printf("Printing subbedTo list : ");
+    printf("%s \n", clientList_to_string(clients));
+
+    response[0] = '3';
+    strcat(response + 1, name);
+    int n = send(client_socket, response, BUFFER_SIZE, 0);
+    check_error(n, "error in handle_unsubs send()\n");
+    printf("Client unsubed to %s\n", name);
+
+    free(name);
+    free(response);
 }
 
 void handle_publish(char *buffer, int client_socket)

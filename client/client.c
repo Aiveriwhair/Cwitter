@@ -157,14 +157,17 @@ void handle_error(char *buffer)
     case 'l':
         printf("\n ERROR : Login error, account doesn't exist\n");
         // Return to authentification
+    case 'd':
+        printf("\n ERROR : You have already subscribe to this user ! \n");
+        break;
     case 'u':
+        printf("\n ERROR : You can't unsubscrbe to this user because you don't follow him ! \n");
+        break;
+    case 't':
         printf("\n ERROR : You can't unsubscribe to yourself ! \n");
         break;
-    case 's3':
-        printf("\n ERROR : You can't subscribe to yourself ! \n");
-        break;
-    case 's4':
-        printf("\n ERROR : You can't subscribe to yourself ! \n");
+    case 'r':
+        printf("\n ERROR : You haven't follow someone yet ! \n");
         break;
     default:
         break;
