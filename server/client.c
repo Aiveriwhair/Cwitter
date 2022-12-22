@@ -159,24 +159,23 @@ void add_client(clientList *cList, Client *client)
 void remove_client(clientList *cList, Client *clientToUnsub)
 {
     clientList *temp = cList;
-    if (temp->client == clientToUnsub)
+    printf("client to unsub: %s\n", clientToUnsub->name);
+    printf("Printing client sub to list : ");
+    printf("%s\n", clientList_to_string(cList));
+    bool found = false;
+    while (temp != NULL && !found)
     {
-        clientList *next = temp->next;
-        delete_clientList(temp);
-        cList = next;
-        return;
-    }
-    while (temp->next != NULL)
-    {
-        if (temp->next->client == clientToUnsub)
+        if (temp->client == clientToUnsub)
         {
-            clientList *next = temp->next->next;
-            delete_clientList(temp->next);
-            temp->next = next;
-            return;
+            printf("found client to unsub\n");
+            cList = temp->next;
+            free(temp);
+            found = true;
         }
         temp = temp->next;
     }
+    printf("Printing again client sub to list : ");
+    printf("%s\n", clientList_to_string(cList));
 }
 
 char *client_to_string(Client *client)
@@ -237,15 +236,16 @@ char *clients_to_string(clientList *clist)
 char *clientList_to_string(clientList *clist)
 {
     char *res = malloc(0);
-    memset(res, '\0', strlen(res));
     clientList *temp = clist;
+
     if (temp == NULL)
-    {
-        return "NULL";
-    }
+        return "EMPTY";
+    if (temp->client == NULL)
+        return "EMPTY";
     while (temp != NULL)
     {
         Client *current = temp->client;
+
         // printf("realloc %d bytes\n", charS * strlen(res) + charS * strlen(current->name) + charS);
         res = (char *)realloc(res, charS * strlen(res) + charS * strlen(current->name) + charS);
         if (temp->next == NULL)

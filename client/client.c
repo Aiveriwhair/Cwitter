@@ -342,14 +342,26 @@ void print_menu()
 
 int main(int argc, char **argv)
 {
-    if (argc != 3)
+    printf("%s", argv[3]);
+    if (argc < 3)
     {
         printf("Usage: %s <ip> <port> \n", argv[0]);
         return EXIT_FAILURE;
     }
     printf("\n\n\n----------- Welcome on Cwitter -----------\n\n\n");
-    char *pseudo = auth();
-    pseudo[strlen(pseudo) - 1] = '\0';
+    char *pseudo = malloc(20);
+    printf("Hey\n");
+    if (argc == 3)
+    {
+        pseudo = auth();
+        pseudo[strlen(pseudo) - 1] = '\0';
+    }
+    else if (argc == 4)
+    {
+        pseudo = argv[3];
+        pseudo[0] = '6';
+        printf("Hello %s\n", pseudo);
+    }
     start_client(argv[1], atoi(argv[2]), pseudo);
 
     return EXIT_SUCCESS;

@@ -264,7 +264,6 @@ void handle_unsubscribe(char *buffer, SOCKET client_socket)
         return;
     }
     // If yes, continue
-    sub = get_client_by_name(clients, name);
     // check if trying to unsub from self
     if (sub == currentClient)
     {
@@ -290,8 +289,8 @@ void handle_unsubscribe(char *buffer, SOCKET client_socket)
         free(response);
         return;
     }
-
-    for (clientList *tmp = currentClient->subbedTo; tmp != NULL; tmp = tmp->next)
+    clientList *tmp = currentClient->subbedTo;
+    for (tmp; tmp != NULL; tmp = tmp->next)
     {
         if (tmp->client == sub)
         {
@@ -313,13 +312,17 @@ void handle_unsubscribe(char *buffer, SOCKET client_socket)
     }
 
     // Remove from subbedTo list
-    clientList *temp2 = currentClient->subbedTo;
-    remove_client(temp2, sub);
-    printf("Printing subbedTo list : ");
+    remove_client(currentClient->subbedTo, sub);
+    printf("Printing clients list : ");
     printf("%s \n", clientList_to_string(clients));
+    printf("Printing clients subbed to list : ");
+    printf("%s\n", clientList_to_string(currentClient->subbedTo));
+    printf("Done printing lists after removal\n ");
 
     response[0] = '3';
     strcat(response + 1, name);
+    printf("after strcat\n ");
+
     int n = send(client_socket, response, BUFFER_SIZE, 0);
     check_error(n, "error in handle_unsubs send()\n");
     printf("Client unsubed to %s\n", name);
@@ -348,6 +351,8 @@ void handle_list(char *buffer, SOCKET client_socket)
     response[1] = '-';
     for (tmp; tmp != NULL; tmp = tmp->next)
     {
+        response = strcat(response, intToString(tmp->client->socket));
+        response = strcat(response, ":");
         response = strcat(response, tmp->client->name);
         response = strcat(response, "-");
     }
