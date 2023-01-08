@@ -162,16 +162,16 @@ void remove_client(clientList *cList, Client *clientToUnsub)
     if (temp->client == clientToUnsub)
     {
         clientList *next = temp->next;
-        delete_clientList(temp);
-        cList = next;
+        free(temp);
+        temp = next;
         return;
     }
-    while (temp->next != NULL)
+    while (temp != NULL)
     {
         if (temp->next->client == clientToUnsub)
         {
             clientList *next = temp->next->next;
-            delete_clientList(temp->next);
+            free(temp->next);
             temp->next = next;
             return;
         }
@@ -181,7 +181,8 @@ void remove_client(clientList *cList, Client *clientToUnsub)
 
 char *client_to_string(Client *client)
 {
-    char *res = malloc(0);
+    char *res = malloc(1);
+    res[0] = '\0';
     // pseudo
     if (client->name != NULL)
     {
@@ -220,7 +221,9 @@ char *client_to_string(Client *client)
 char *clients_to_string(clientList *clist)
 {
     clientList *temp = clist;
-    char *res = malloc(0);
+    char *res = malloc(1);
+    res[0] = '\0';
+
     while (temp != NULL)
     {
         Client *current = temp->client;
@@ -236,7 +239,8 @@ char *clients_to_string(clientList *clist)
 
 char *clientList_to_string(clientList *clist)
 {
-    char *res = malloc(0);
+    char *res = malloc(1);
+    res[0] = '\0';
     clientList *temp = clist;
     if (temp == NULL)
     {
