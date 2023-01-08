@@ -34,6 +34,12 @@ void handle_unsubscribe(SOCKET client_socket, char *buffer)
     write_to_server(client_socket, buffer);
 }
 
+void handle_quit(SOCKET client_socket, char *buffer)
+{
+    buffer[0] = '5';
+    write_to_server(client_socket, buffer);
+}
+
 void handle_publish(SOCKET client_socket, char *buffer)
 {
 }
@@ -75,7 +81,8 @@ int request_server(SOCKET client_socket, char *buffer)
         else if (c == '5')
         {
             // Quit
-            kill_client(client_socket);
+            handle_quit(client_socket, buffer);
+            return 1;
         }
         else
         {
@@ -218,13 +225,6 @@ void start_client(char *ip, int port, char *pseudo)
             }
         }
     }
-    kill_client(socket_client);
-}
-
-void kill_client(SOCKET client_socket)
-{
-    printf("Closing client socket\n");
-    close(client_socket);
 }
 
 int init_client(char *ip, int port)

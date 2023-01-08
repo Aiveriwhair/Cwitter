@@ -22,14 +22,68 @@ int start_server(int port)
     FD_ZERO(&readfds);
     FD_SET(server_socket, &readfds);
 
+    // array of sockets
+    int client_sockets[100];
+    // initialize to -1
+    for (int i = 0; i < 100; i++)
+    {
+        client_sockets[i] = -1;
+    }
+    int client_sockets_length = 0;
+
     while (1)
     {
         // printf("Waiting for new select resolution\n");
+        FD_SET(server_socket, &readfds);
 
-        for (int i = server_socket; i < maxFD + 1; i++)
+        clientList *tmp = clients;
+        int max_socket_client = -1;
+
+        while (tmp != NULL)
         {
-            FD_SET(i, &readfds);
+            // get client
+            Client *c = tmp->client;
+            int tmp_socket = c->socket;
+            // printing client and isconnected
+            printf("Client %d is connected: %d\n", c->socket, c->isConnected);
+            // watch isconnected
+            if (c->isConnected)
+            {
+                FD_SET(c->socket, &readfds);
+            }
+
+            if (!c->isConnected)
+            {
+                // remove socket from fd_set
+                FD_CLR(c->socket, &readfds);
+            }
+            tmp = tmp->next;
+
+            if (tmp_socket > max_socket_client)
+            {
+                max_socket_client = tmp_socket;
+            }
         }
+
+        if (max_socket_client > maxFD)
+        {
+            maxFD = max_socket_client;
+        }
+        // printing file descriptors
+        printf("File descriptors: ");
+        for (int i = 0; i < maxFD + 1; i++)
+        {
+            if (FD_ISSET(i, &readfds))
+            {
+                printf("%d ", i);
+            }
+        }
+        printf("\n");
+
+        // for (int i = server_socket; i < maxFD + 1; i++)
+        // {
+        //     FD_SET(i, &readfds);
+        // }
 
         int resultSelect = select(maxFD + 1, &readfds, NULL, NULL, NULL);
         check_error(resultSelect, "error in select()\n");
@@ -40,11 +94,24 @@ int start_server(int port)
             printf("New client connection\n");
             struct sockaddr_in csin = {0};
             size_t sinsize = sizeof csin;
-            SOCKET csock = accept(server_socket, (struct sockaddr *)&csin, &sinsize);
+            SOCKET csock = accept(server_socket, (struct sockaddr *)&csin, (socklen_t *)&sinsize);
+            printf("csock: %d\n", csock);
             check_error(csock, "error in accept()\n");
 
             printf("New client connected from %s:%d - socket %d\n", inet_ntoa(csin.sin_addr),
                    htons(csin.sin_port), csock);
+
+            client_sockets_length++;
+
+            // on parcourt le tableau des sockets clients
+            for (int i = 0; i < MAX_CLIENTS; i++)
+            {
+                if (client_sockets[i] == csock)
+                {
+                    csock = csock + 1;
+                }
+            }
+            client_sockets[client_sockets_length] = csock;
 
             handle_request(readfds, csock);
             if (csock > maxFD)
@@ -386,8 +453,13 @@ void handle_list(char *buffer, SOCKET client_socket)
 
 void handle_quit(char *buffer, SOCKET client_socket)
 {
-    // Will
-    // Set isConnected to 0
+    // Get current client
+    Client *currentClient = get_client_by_socket(clients, client_socket);
+    // Put isconnected to 0
+    currentClient->isConnected = false;
+
+    // Close socket
+    close(client_socket);
 }
 
 void handle_new_account(char *buffer, SOCKET client_socket)

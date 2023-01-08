@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
-#include <termios.h> 
+#include <termios.h>
 #include <stdbool.h>
 
 #define BUFFER_SIZE 1024
@@ -29,10 +29,9 @@ enum requestType
 };
 
 /**********     CLIENT    **********/
-char* auth();
+char *auth();
 void start_client(char *ip, int port, char *pseudo);
 int init_client(char *ip, int port);
-void kill_client(SOCKET client_socket);
 
 /**********     TO SERVER    **********/
 void write_to_server(SOCKET client_socket, char *buffer);
@@ -40,9 +39,7 @@ void handle_list(SOCKET client_socket, char *buffer);
 void handle_subscribe(SOCKET client_socket, char *buffer);
 void handle_unsubscribe(SOCKET client_socket, char *buffer);
 void handle_publish(SOCKET client_socket, char *buffer);
-
-
-
+void handle_quit(SOCKET client_socket, char *buffer);
 
 /**********     REQUEST HANDLING    **********/
 int request_server(SOCKET client_socket, char *buffer);

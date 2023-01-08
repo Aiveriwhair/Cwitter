@@ -1,5 +1,7 @@
 #include "client.h"
 
+#define MAX_CLIENTS 100;
+
 /*********  CLIENT  **********/
 Client *init_client(SOCKET socket, char *name, messageList *messages, clientList *subbedTo)
 {
@@ -8,7 +10,7 @@ Client *init_client(SOCKET socket, char *name, messageList *messages, clientList
     strcpy(client->name, name);
     client->messages = messages;
     client->subbedTo = subbedTo;
-    client->isConnected = false;
+    client->isConnected = true;
     return client;
 }
 
