@@ -24,7 +24,7 @@ int start_server(int port)
 
     while (1)
     {
-        printf("Waiting for new select resolution\n");
+        // printf("Waiting for new select resolution\n");
 
         for (int i = server_socket; i < maxFD + 1; i++)
         {
@@ -33,7 +33,7 @@ int start_server(int port)
 
         int resultSelect = select(maxFD + 1, &readfds, NULL, NULL, NULL);
         check_error(resultSelect, "error in select()\n");
-        printf("Select resolved\n");
+        // printf("Select resolved\n");
 
         if (FD_ISSET(server_socket, &readfds))
         {
@@ -209,13 +209,15 @@ void handle_subscribe(char *buffer, SOCKET client_socket)
     // If yes, add to subbedTo list
     if (currentClient->subbedTo == NULL)
     {
+        printf("subbedTo NULL in sub\n");
         currentClient->subbedTo = init_clientList(sub);
     }
     else
     {
+        printf("subbedTo not NULL in sub\n");
         add_client(currentClient->subbedTo, sub);
     }
-    printf("Printing subbedTo list :\n");
+    printf("SubbedTo list :\n");
     printf("%s\n", clientList_to_string(currentClient->subbedTo));
 
     response[0] = '2';
@@ -295,8 +297,7 @@ void handle_unsubscribe(char *buffer, SOCKET client_socket)
     // If yes, remove from subbedTo list
     // Remove from subbedTo list
     remove_client(currentClient->subbedTo, cli);
-
-    printf("Printing subbedTo list : ");
+    printf("Subbed to : ");
     printf("%s \n", clientList_to_string(currentClient->subbedTo));
 
     response[0] = '3';
